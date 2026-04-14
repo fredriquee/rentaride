@@ -14,13 +14,20 @@ const userSchema = new mongoose.Schema({
 
   password: {
     type: String,
-    required: true
+    required: true,
+    select: false
   },
 
   role: {
     type: String,
-    enum: ["user", "owner", "admin"],
-    default: "user"
+    enum: ["renter", "owner", "admin"],
+    default: "renter"
+  },
+
+  currentRole: {
+    type: String,
+    enum: ["renter", "owner"],
+    default: "renter"
   }
 
 }, { timestamps: true });
