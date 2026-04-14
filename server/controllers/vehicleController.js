@@ -1,50 +1,199 @@
 const Vehicle = require("../models/Vehicle");
+const asyncHandler = require("express-async-handler");
+const fs = require("fs");
+const path = require("path");
 
-//ADD Vehicle
-exports.addVehicle = async (req, res) => {
-  try {
-    const { title, type, pricePerDay, location, image } = req.body;
+// @desc    Add a new vehicle
+// @route   POST /api/vehicles
+// @access  Private/Owner
+exports.addVehicle = asyncHandler(async (req, res) => {
+  const { title, type, pricePerDay, location, image } = req.body;
 
-    const vehicle = new Vehicle({
-      title,
-      type,
-      pricePerDay,
-      location,
-      image,
-      owner: req.user.id // 🔥 from token
+  console.log("Request body:", req.body);
+  console.log("Request files:", req.files);
+
+  // Validate required fields
+  if (!title || !type || !pricePerDay || !location) {
+    res.status(400);
+    throw new Error("Please provide all required fields: title, type, pricePerDay, location");
+  }
+
+  // Validate price is positive
+  if (isNaN(pricePerDay) || pricePerDay <= 0) {
+    res.status(400);
+    throw new Error("Price per day must be a positive number");
+  }
+
+  // Get uploaded file paths
+  const images = req.files
+    ? req.files.map((file) => `/uploads/${file.filename}`)
+    : [];
+
+  console.log("Processed images array:", images);
+
+  const vehicle = await Vehicle.create({
+    title,
+    type,
+    pricePerDay: parseFloat(pricePerDay),
+    location,
+    image: image || (images.length > 0 ? images[0] : null),
+    images: images.length > 0 ? images : [],
+    owner: req.user._id,
+  });
+
+  console.log("Vehicle created:", vehicle);
+  res.status(201).json(vehicle);
+});
+
+// @desc    Get all vehicles
+// @route   GET /api/vehicles
+// @access  Public
+exports.getAllVehicles = asyncHandler(async (req, res) => {
+  const vehicles = await Vehicle.find().populate("owner", "name email");
+  res.json(vehicles);
+});
+
+// @desc    Get vehicle by ID
+// @route   GET /api/vehicles/:id
+// @access  Public
+exports.getVehicleById = asyncHandler(async (req, res) => {
+  const vehicle = await Vehicle.findById(req.params.id).populate("owner", "name email");
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error("Vehicle not found");
+  }
+
+  res.json(vehicle);
+});
+
+// @desc    Get all vehicles by owner
+// @route   GET /api/vehicles/owner/myVehicles
+// @access  Private/Owner
+exports.getOwnerVehicles = asyncHandler(async (req, res) => {
+  const vehicles = await Vehicle.find({ owner: req.user._id });
+  res.json(vehicles);
+});
+
+// @desc    Get all vehicles by a specific user (public)
+// @route   GET /api/vehicles/user/:userId
+// @access  Public
+exports.getVehiclesByUserId = asyncHandler(async (req, res) => {
+  const vehicles = await Vehicle.find({ owner: req.params.userId }).populate("owner", "name email");
+  res.json(vehicles);
+});
+
+// @desc    Update a vehicle
+// @route   PUT /api/vehicles/:id
+// @access  Private/Owner
+exports.updateVehicle = asyncHandler(async (req, res) => {
+  const { title, type, pricePerDay, location, status } = req.body;
+  const vehicle = await Vehicle.findById(req.params.id);
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error("Vehicle not found");
+  }
+
+  // Check ownership
+  if (vehicle.owner.toString() !== req.user._id) {
+    res.status(403);
+    throw new Error("Not authorized to update this vehicle");
+  }
+
+  // Update fields (only if provided)
+  if (title) vehicle.title = title;
+  if (type) vehicle.type = type;
+  if (pricePerDay) vehicle.pricePerDay = parseFloat(pricePerDay);
+  if (location) vehicle.location = location;
+  if (status) vehicle.status = status;
+
+  // Handle new image uploads (replace old one)
+  if (req.files && req.files.length > 0) {
+    // Delete old image if it exists
+    if (vehicle.image && vehicle.image.startsWith("/uploads/")) {
+      const oldPath = path.join(__dirname, `..${vehicle.image}`);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    // Set new image
+    const newImagePath = `/uploads/${req.files[0].filename}`;
+    vehicle.image = newImagePath;
+    vehicle.images = [newImagePath];
+  }
+
+  const updated = await vehicle.save();
+  res.json(updated);
+});
+
+// @desc    Delete a vehicle image
+// @route   DELETE /api/vehicles/:id/image
+// @access  Private/Owner
+exports.deleteVehicleImage = asyncHandler(async (req, res) => {
+  const { imageUrl } = req.body;
+  const vehicle = await Vehicle.findById(req.params.id);
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error("Vehicle not found");
+  }
+
+  // Check ownership
+  if (vehicle.owner.toString() !== req.user._id) {
+    res.status(403);
+    throw new Error("Not authorized to delete this image");
+  }
+
+  // Remove image from database
+  if (vehicle.image === imageUrl) {
+    vehicle.image = null;
+  }
+
+  if (vehicle.images && vehicle.images.includes(imageUrl)) {
+    vehicle.images = vehicle.images.filter(img => img !== imageUrl);
+  }
+
+  // Delete file from server
+  if (imageUrl.startsWith("/uploads/")) {
+    const fullPath = path.join(__dirname, `..${imageUrl}`);
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
+    }
+  }
+
+  const updated = await vehicle.save();
+  res.json(updated);
+});
+
+// @desc    Delete a vehicle
+// @route   DELETE /api/vehicles/:id
+// @access  Private/Owner
+exports.deleteVehicle = asyncHandler(async (req, res) => {
+  const vehicle = await Vehicle.findById(req.params.id);
+
+  if (!vehicle) {
+    res.status(404);
+    throw new Error("Vehicle not found");
+  }
+
+  // Check for ownership
+  if (vehicle.owner.toString() !== req.user._id) {
+    res.status(403);
+    throw new Error("Not authorized to delete this vehicle");
+  }
+
+  // Delete uploaded images from server
+  if (vehicle.images && vehicle.images.length > 0) {
+    vehicle.images.forEach((imagePath) => {
+      const fullPath = path.join(__dirname, `..${imagePath}`);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+      }
     });
-
-    await vehicle.save();
-
-    res.status(201).json({ message: "Vehicle added successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
-};
 
-//Get all vehicles
-exports.getAllVehicles = async (req, res) => {
-  try {
-    const vehicles = await Vehicle.find().populate("owner", "name email");
-    res.json(vehicles);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-//DELETE VEHICLES
-exports.deleteVehicle = async (req, res) => {
-  try {
-    const vehicle = await Vehicle.findById(req.params.id);
-    if (!vehicle) {
-      return res.status(404).json({ message: "Vehicle not found" });
-    }
-    if (vehicle.owner.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You don't have permission to delete this vehicle" });
-    }
-    await vehicle.deleteOne();
-    res.status(200).json({ message: "Vehicle deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+  await vehicle.deleteOne();
+  res.json({ message: "Vehicle removed" });
+});
