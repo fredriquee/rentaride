@@ -8,7 +8,7 @@ const ProtectedRoute = ({ component: Component, requiredRole = null }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user.role !== requiredRole) {
+  if (requiredRole && user.currentRole !== requiredRole) {
     return <Navigate to="/" replace />;
   }
 

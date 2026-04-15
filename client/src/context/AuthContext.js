@@ -43,13 +43,23 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const switchRole = async (newRole) => {
+    const { data } = await axios.put("http://localhost:5000/api/auth/switch-role", {
+      newRole,
+    }, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    });
+    setUser(data);
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, switchRole }}>
       {children}
     </AuthContext.Provider>
   );

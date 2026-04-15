@@ -2,14 +2,15 @@ import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Save, AlertCircle } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save, AlertCircle, Briefcase } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, switchRole } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("account");
   const [loading, setLoading] = useState(false);
+  const [switchingRole, setSwitchingRole] = useState(false);
 
   // Account Settings
   const [name, setName] = useState(user?.name || "");
@@ -98,6 +99,23 @@ const Settings = () => {
     }
   };
 
+  const handleRoleSwitch = async (newRole) => {
+    if (user?.currentRole === newRole) {
+      toast.info(`Already in ${newRole} mode`);
+      return;
+    }
+
+    try {
+      setSwitchingRole(true);
+      await switchRole(newRole);
+      toast.success(`Switched to ${newRole} mode successfully!`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || `Failed to switch to ${newRole} mode`);
+    } finally {
+      setSwitchingRole(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
@@ -124,6 +142,16 @@ const Settings = () => {
           }`}
         >
           Account Settings
+        </button>
+        <button
+          onClick={() => setActiveTab("roles")}
+          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+            activeTab === "roles"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300"
+          }`}
+        >
+          Manage Roles
         </button>
         <button
           onClick={() => setActiveTab("security")}
@@ -197,6 +225,96 @@ const Settings = () => {
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </form>
+        </div>
+      )}
+
+      {/* Manage Roles Tab */}
+      {activeTab === "roles" && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 max-w-2xl">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Manage Your Roles
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Switch between Renter and Owner modes to perform different actions
+          </p>
+
+          <div className="space-y-4">
+            {/* Current Role Display */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <Briefcase size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-300">Current Mode</p>
+                  <p className="text-lg font-bold text-blue-600 dark:text-blue-300 capitalize mt-1">
+                    {user?.currentRole === "owner" ? "Owner Mode" : "Renter Mode"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Role Options */}
+            <div className="space-y-3">
+              {/* Renter Mode */}
+              <button
+                onClick={() => handleRoleSwitch("renter")}
+                disabled={switchingRole || user?.currentRole === "renter"}
+                className={`w-full p-4 rounded-lg border-2 transition-all ${
+                  user?.currentRole === "renter"
+                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-600"
+                } ${switchingRole ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="text-left">
+                    <h3 className="font-bold text-gray-900 dark:text-white">Renter Mode</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Book and rent vehicles from other owners
+                    </p>
+                  </div>
+                  {user?.currentRole === "renter" && (
+                    <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {/* Owner Mode */}
+              <button
+                onClick={() => handleRoleSwitch("owner")}
+                disabled={switchingRole || user?.currentRole === "owner"}
+                className={`w-full p-4 rounded-lg border-2 transition-all ${
+                  user?.currentRole === "owner"
+                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-600"
+                } ${switchingRole ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="text-left">
+                    <h3 className="font-bold text-gray-900 dark:text-white">Owner Mode</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      List and manage your vehicles, view booking requests
+                    </p>
+                  </div>
+                  {user?.currentRole === "owner" && (
+                    <span className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+              </button>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-6">
+              <div className="flex gap-3">
+                <AlertCircle size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  You can switch between roles at any time. Access different features based on your current mode.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
