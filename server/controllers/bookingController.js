@@ -6,6 +6,12 @@ const asyncHandler = require("express-async-handler");
 // @route   POST /api/bookings
 // @access  Private
 exports.createBooking = asyncHandler(async (req, res) => {
+  // Only allow renters to book vehicles
+  if (req.user.currentRole !== "renter") {
+    res.status(403);
+    throw new Error("You must be in Renter mode to book vehicles. Switch to Renter mode in Settings.");
+  }
+
   const { vehicle: vehicleId, startDate, endDate } = req.body;
 
   const vehicle = await Vehicle.findById(vehicleId);

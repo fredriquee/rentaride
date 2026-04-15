@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info } from "lucide-react";
+import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, AlertCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function BookingPage() {
@@ -52,6 +52,11 @@ function BookingPage() {
     if (!user) {
       toast.error("Please login to book");
       navigate("/login");
+      return;
+    }
+
+    if (user.currentRole === "owner") {
+      toast.error("Switch to Renter mode to book vehicles");
       return;
     }
 
@@ -204,13 +209,26 @@ function BookingPage() {
                 </div>
               </div>
 
+              {user?.currentRole === "owner" && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3">
+                  <AlertCircle className="text-amber-600 dark:text-amber-400 mt-1 shrink-0" size={18} />
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    Switch to <strong>Renter Mode</strong> in Settings to book vehicles.
+                  </p>
+                </div>
+              )}
+
               <button
                 type="submit"
-                disabled={submitting}
-                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-4"
+                disabled={submitting || user?.currentRole === "owner"}
+                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
               >
                 {submitting ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : user?.currentRole === "owner" ? (
+                  <>
+                    Switch to Renter Mode
+                  </>
                 ) : (
                   <>
                     Confirm Booking
