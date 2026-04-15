@@ -11,7 +11,7 @@ const {
   deleteVehicleImage
 } = require("../controllers/vehicleController");
 
-const { authMiddleware } = require("../middleware/authMiddleware");
+const { authMiddleware, ownerMiddleware } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 
 // Get all vehicles (public)
@@ -20,32 +20,34 @@ router.get("/", getAllVehicles);
 // Get vehicles by specific user (public)
 router.get("/user/:userId", getVehiclesByUserId);
 
-// Get owner's vehicles (private)
-router.get("/owner/myVehicles", authMiddleware, getOwnerVehicles);
+// Get owner's vehicles (private, owner only)
+router.get("/owner/myVehicles", authMiddleware, ownerMiddleware, getOwnerVehicles);
 
 // Get specific vehicle by ID (public)
 router.get("/:id", getVehicleById);
 
-// Create new vehicle (private)
+// Create new vehicle (private, owner only)
 router.post(
   "/",
   authMiddleware,
+  ownerMiddleware,
   upload.array("images", 1),
   addVehicle
 );
 
-// Update vehicle (private)
+// Update vehicle (private, owner only)
 router.put(
   "/:id",
   authMiddleware,
+  ownerMiddleware,
   upload.array("images", 1),
   updateVehicle
 );
 
-// Delete vehicle image (private)
-router.delete("/:id/image", authMiddleware, deleteVehicleImage);
+// Delete vehicle image (private, owner only)
+router.delete("/:id/image", authMiddleware, ownerMiddleware, deleteVehicleImage);
 
-// Delete vehicle (private)
-router.delete("/:id", authMiddleware, deleteVehicle);
+// Delete vehicle (private, owner only)
+router.delete("/:id", authMiddleware, ownerMiddleware, deleteVehicle);
 
 module.exports = router;

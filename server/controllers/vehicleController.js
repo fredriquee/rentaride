@@ -96,7 +96,7 @@ exports.updateVehicle = asyncHandler(async (req, res) => {
   }
 
   // Check ownership
-  if (vehicle.owner.toString() !== req.user._id) {
+  if (vehicle.owner.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error("Not authorized to update this vehicle");
   }
@@ -141,7 +141,7 @@ exports.deleteVehicleImage = asyncHandler(async (req, res) => {
   }
 
   // Check ownership
-  if (vehicle.owner.toString() !== req.user._id) {
+  if (vehicle.owner.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error("Not authorized to delete this image");
   }
@@ -179,7 +179,7 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
   }
 
   // Check for ownership
-  if (vehicle.owner.toString() !== req.user._id) {
+  if (vehicle.owner.toString() !== req.user._id.toString()) {
     res.status(403);
     throw new Error("Not authorized to delete this vehicle");
   }
