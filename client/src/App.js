@@ -96,7 +96,7 @@ const Navbar = () => {
                           </span>
                         )}
                       </Link>
-                      <Link to="/add-vehicle" className="bg-blue-600 hover:bg-blue-700 text-white p-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 transition shadow-lg shadow-blue-500/20 group">
+                      <Link to="/add-vehicle" className="bg-blue-600 hover:bg-blue-700 text-white p-2 sm:px-4 sm:py-2 rounded-lg flex items-center gap-2 transition group">
                         <PlusCircle size={18} className="group-hover:rotate-90 transition-transform duration-300" />
                         <span className="hidden lg:inline text-sm font-bold tracking-wide">Add Vehicle</span>
                       </Link>
@@ -121,7 +121,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-2 sm:gap-4">
                   <ThemeToggle />
                   <Link to="/login" className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Login</Link>
-                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold transition shadow-lg shadow-blue-500/20 active:scale-95">
+                  <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold transition active:scale-95">
                     Register
                   </Link>
                 </div>

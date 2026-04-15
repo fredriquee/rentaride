@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye, EyeOff, Save, AlertCircle, Briefcase } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
 import toast from "react-hot-toast";
 
 const Settings = () => {
@@ -240,16 +240,11 @@ const Settings = () => {
 
           <div className="space-y-4">
             {/* Current Role Display */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-              <div className="flex items-start gap-3">
-                <Briefcase size={20} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-300">Current Mode</p>
-                  <p className="text-lg font-bold text-blue-600 dark:text-blue-300 capitalize mt-1">
-                    {user?.currentRole === "owner" ? "Owner Mode" : "Renter Mode"}
-                  </p>
-                </div>
-              </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-6">
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Current Mode</p>
+              <p className="text-lg font-bold text-gray-900 dark:text-white capitalize mt-2">
+                {user?.currentRole === "owner" ? "Owner Mode" : "Renter Mode"}
+              </p>
             </div>
 
             {/* Role Options */}
@@ -306,13 +301,10 @@ const Settings = () => {
             </div>
 
             {/* Info Box */}
-            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mt-6">
-              <div className="flex gap-3">
-                <AlertCircle size={18} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  You can switch between roles at any time. Access different features based on your current mode.
-                </p>
-              </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg p-4 mt-6">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                You can switch between roles at any time. Access different features based on your current mode.
+              </p>
             </div>
           </div>
         </div>
@@ -417,13 +409,10 @@ const Settings = () => {
             </div>
 
             {/* Password Strength Info */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-              <div className="flex gap-2">
-                <AlertCircle size={18} className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Use a mix of uppercase, lowercase, numbers, and special characters for a strong password.
-                </p>
-              </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Use a mix of uppercase, lowercase, numbers, and special characters for a strong password.
+              </p>
             </div>
 
             {/* Save Button */}

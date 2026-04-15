@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, AlertCircle } from "lucide-react";
+import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function BookingPage() {
@@ -110,7 +110,7 @@ function BookingPage() {
                 <Car size={64} />
               </div>
             )}
-            <div className="absolute top-4 right-4 bg-white dark:bg-gray-800/90 backdrop-blur px-4 py-2 rounded-2xl shadow-lg font-bold text-blue-600 border dark:border-gray-700 border-white/50">
+            <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg font-bold text-blue-600 border dark:border-gray-700 border-gray-200">
               Rs {vehicle.pricePerDay}/day
             </div>
           </div>
@@ -125,9 +125,9 @@ function BookingPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="bg-blue-50 border dark:border-gray-700 border-blue-100 p-4 rounded-2xl flex items-start gap-3">
-              <Info className="text-blue-500 mt-1 shrink-0" size={20} />
-              <p className="text-sm text-blue-700 leading-relaxed">
+            <div className="bg-gray-50 border dark:border-gray-700 border-gray-200 p-4 rounded-lg flex items-start gap-3">
+              <Info className="text-gray-600 dark:text-gray-400 mt-1 shrink-0" size={20} />
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 Bookings are subject to owner approval. You will be notified once the owner confirms your request.
               </p>
             </div>
@@ -210,9 +210,8 @@ function BookingPage() {
               </div>
 
               {user?.currentRole === "owner" && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3">
-                  <AlertCircle className="text-amber-600 dark:text-amber-400 mt-1 shrink-0" size={18} />
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                <div className="bg-gray-100 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Switch to <strong>Renter Mode</strong> in Settings to book vehicles.
                   </p>
                 </div>
@@ -221,7 +220,7 @@ function BookingPage() {
               <button
                 type="submit"
                 disabled={submitting || user?.currentRole === "owner"}
-                className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-100 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
+                className="w-full bg-blue-600 text-white py-4 rounded-lg font-bold hover:bg-blue-700 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-4"
               >
                 {submitting ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

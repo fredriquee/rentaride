@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, AlertCircle, Car, Info, MessageSquareText } from "lucide-react";
+import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText } from "lucide-react";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);

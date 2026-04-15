@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import { Car, ArrowLeft, AlertCircle } from "lucide-react";
+import { Car, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 const UserProfile = () => {
@@ -95,12 +95,9 @@ const UserProfile = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         ) : error ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-start gap-3">
-            <AlertCircle size={20} className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-red-900 dark:text-red-300">Error</h3>
-              <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
-            </div>
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+            <h3 className="font-semibold text-red-900 dark:text-red-300">Error</h3>
+            <p className="text-sm text-red-800 dark:text-red-400 mt-2">{error}</p>
           </div>
         ) : vehicles.length === 0 ? (
           <div className="bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg py-12 text-center">
