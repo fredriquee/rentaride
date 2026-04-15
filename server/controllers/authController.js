@@ -7,7 +7,7 @@ const asyncHandler = require("express-async-handler");
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, phone, role } = req.body;
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -21,6 +21,7 @@ exports.register = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    phone: phone || "",
     role: role || "renter",
     currentRole: role || "renter",
   });
@@ -30,6 +31,7 @@ exports.register = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
       currentRole: user.currentRole,
       token: generateToken(user._id, user.role, user.name, user.email),
@@ -59,6 +61,7 @@ exports.login = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
       currentRole: user.currentRole,
       token: generateToken(user._id, user.role, user.name, user.email),
@@ -99,6 +102,7 @@ exports.switchRole = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
+    phone: user.phone,
     role: user.role,
     currentRole: user.currentRole,
     message: `Switched to ${newRole} mode`,
@@ -109,16 +113,21 @@ exports.switchRole = asyncHandler(async (req, res) => {
 // @route   PUT /api/auth/update-profile
 // @access  Private
 exports.updateProfile = asyncHandler(async (req, res) => {
-  const { name } = req.body;
+  const { name, phone } = req.body;
 
   if (!name || !name.trim()) {
     res.status(400);
     throw new Error("Name is required");
   }
 
+  const updateData = { name: name.trim() };
+  if (phone !== undefined) {
+    updateData.phone = phone.trim();
+  }
+
   const user = await User.findByIdAndUpdate(
     req.user._id,
-    { name: name.trim() },
+    updateData,
     { new: true }
   ).select("-password");
 
@@ -126,6 +135,7 @@ exports.updateProfile = asyncHandler(async (req, res) => {
     _id: user._id,
     name: user.name,
     email: user.email,
+    phone: user.phone,
     role: user.role,
     currentRole: user.currentRole,
     message: "Profile updated successfully",

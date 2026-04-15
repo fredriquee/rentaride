@@ -49,7 +49,7 @@ exports.addVehicle = asyncHandler(async (req, res) => {
 // @route   GET /api/vehicles
 // @access  Public
 exports.getAllVehicles = asyncHandler(async (req, res) => {
-  const vehicles = await Vehicle.find().populate("owner", "name email");
+  const vehicles = await Vehicle.find().populate("owner", "name email phone");
   res.json(vehicles);
 });
 
@@ -57,7 +57,7 @@ exports.getAllVehicles = asyncHandler(async (req, res) => {
 // @route   GET /api/vehicles/:id
 // @access  Public
 exports.getVehicleById = asyncHandler(async (req, res) => {
-  const vehicle = await Vehicle.findById(req.params.id).populate("owner", "name email");
+  const vehicle = await Vehicle.findById(req.params.id).populate("owner", "name email phone");
 
   if (!vehicle) {
     res.status(404);

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info } from "lucide-react";
+import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, Phone, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function BookingPage() {
@@ -22,8 +22,10 @@ function BookingPage() {
         const res = await axios.get(`http://localhost:5000/api/vehicles`);
         const found = res.data.find(v => v._id === id);
         if (found) {
-          setVehicle(found);
-          setPickupLocation(found.location);
+          // Fetch full vehicle details including owner
+          const detailedRes = await axios.get(`http://localhost:5000/api/vehicles/${id}`);
+          setVehicle(detailedRes.data);
+          setPickupLocation(detailedRes.data.location);
         } else {
           toast.error("Vehicle not found");
           navigate("/");
@@ -143,6 +145,26 @@ function BookingPage() {
                 </div>
               </div>
             </div>
+
+            {vehicle?.owner && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <User className="text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0" size={20} />
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-blue-900 dark:text-blue-200 uppercase tracking-wider mb-2">Owner Contact</p>
+                    <p className="text-sm text-blue-800 dark:text-blue-300 font-semibold">{vehicle.owner.name}</p>
+                    {vehicle.owner.phone && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <Phone size={14} className="text-blue-600 dark:text-blue-400" />
+                        <a href={`tel:${vehicle.owner.phone}`} className="text-sm text-blue-700 dark:text-blue-300 hover:underline font-medium">
+                          {vehicle.owner.phone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

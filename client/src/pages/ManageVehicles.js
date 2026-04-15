@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon, Phone } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import StatusToggle from "../components/StatusToggle";
 
 function ManageVehicles() {
@@ -12,6 +13,7 @@ function ManageVehicles() {
   const [editForm, setEditForm] = useState({});
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const token = localStorage.getItem("token");
 
@@ -279,6 +281,34 @@ function ManageVehicles() {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         Use the toggle below to change availability after saving
                       </p>
+                    </div>
+
+                    <div className="md:col-span-2 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-3">
+                        <Phone size={20} className="text-blue-600 dark:text-blue-400 mt-1 flex-shrink-0" />
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">
+                            Your Contact Number
+                          </label>
+                          <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
+                            This is your contact number that renters will see when they book your vehicle.
+                          </p>
+                          {user?.phone ? (
+                            <div className="p-3 bg-white dark:bg-gray-800 rounded border border-blue-300 dark:border-blue-700">
+                              <p className="font-semibold text-gray-900 dark:text-gray-100">{user.phone}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                <Link to="/settings" className="text-blue-600 hover:underline">Edit in Settings</Link>
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-300 dark:border-yellow-700">
+                              <p className="text-yellow-800 dark:text-yellow-300 text-sm">
+                                No phone number added. <Link to="/settings" className="text-yellow-700 dark:text-yellow-200 font-semibold hover:underline">Add one in Settings</Link>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

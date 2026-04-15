@@ -10,6 +10,7 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import AddVehicle from "./pages/AddVehicle";
 import ManageVehicles from "./pages/ManageVehicles";
 import BookingPage from "./pages/BookingPage";
+import PaymentPage from "./pages/PaymentPage";
 import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -154,6 +155,7 @@ function App() {
                   <Route path="/superadmin" element={<ProtectedRoute component={SuperAdminDashboard} requiredRole="admin" />} />
                   <Route path="/add-vehicle" element={<ProtectedRoute component={AddVehicle} requiredRole="owner" />} />
                   <Route path="/book/:id" element={<ProtectedRoute component={BookingPage} />} />
+                  <Route path="/payment/:bookingId" element={<ProtectedRoute component={PaymentPage} />} />
                   <Route path="/profile/:userId" element={<UserProfile />} />
                   <Route path="/profile" element={<ProtectedRoute component={UserProfile} />} />
                   <Route path="/settings" element={<ProtectedRoute component={Settings} />} />

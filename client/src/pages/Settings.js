@@ -15,6 +15,7 @@ const Settings = () => {
   // Account Settings
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(user?.phone || "");
 
   // Password Settings
   const [currentPassword, setCurrentPassword] = useState("");
@@ -39,7 +40,7 @@ const Settings = () => {
       const token = localStorage.getItem("token");
       await axios.put(
         "http://localhost:5000/api/auth/update-profile",
-        { name },
+        { name, phone },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -200,6 +201,23 @@ const Settings = () => {
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Email cannot be changed
+              </p>
+            </div>
+
+            {/* Phone Field */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                placeholder="+977 98XXXXXXXX"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                This number will be visible to renters who book your vehicles
               </p>
             </div>
 

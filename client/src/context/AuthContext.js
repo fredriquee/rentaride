@@ -9,13 +9,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const currentRole = localStorage.getItem("currentRole");
     if (token) {
       try {
         const userData = JSON.parse(atob(token.split(".")[1]));
+        // Merge currentRole from localStorage
+        if (currentRole) {
+          userData.currentRole = currentRole;
+        }
         setUser(userData);
       } catch (err) {
         console.error("Invalid token");
         localStorage.removeItem("token");
+        localStorage.removeItem("currentRole");
       }
     }
     setLoading(false);
@@ -27,18 +33,21 @@ export const AuthProvider = ({ children }) => {
       password,
     });
     localStorage.setItem("token", data.token);
+    localStorage.setItem("currentRole", data.currentRole);
     setUser(data);
     return data;
   };
 
-  const register = async (name, email, password, role) => {
+  const register = async (name, email, password, phone, role) => {
     const { data } = await axios.post("http://localhost:5000/api/auth/register", {
       name,
       email,
       password,
+      phone,
       role,
     });
     localStorage.setItem("token", data.token);
+    localStorage.setItem("currentRole", data.currentRole);
     setUser(data);
     return data;
   };
@@ -49,12 +58,17 @@ export const AuthProvider = ({ children }) => {
     }, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     });
-    setUser(data);
+    // Save the new currentRole to localStorage
+    localStorage.setItem("currentRole", data.currentRole);
+    // Update user with new currentRole
+    const updatedUser = { ...user, ...data };
+    setUser(updatedUser);
     return data;
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("currentRole");
     setUser(null);
   };
 

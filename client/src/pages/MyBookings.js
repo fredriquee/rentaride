@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText } from "lucide-react";
+import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -10,6 +11,7 @@ function MyBookings() {
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [cancellationReason, setCancellationReason] = useState("");
   const [submittingCancellation, setSubmittingCancellation] = useState(false);
+  const navigate = useNavigate();
 
   const fetchBookings = async () => {
     try {
@@ -45,9 +47,9 @@ function MyBookings() {
       case "pending": return <Clock className="text-amber-500" size={18} />;
       case "confirmed": return <CheckCircle2 className="text-green-500" size={18} />;
       case "cancelled": return <XCircle className="text-red-500" size={18} />;
-      case "cancellation_requested": return <AlertCircle className="text-yellow-500" size={18} />;
+      case "cancellation_requested": return <Clock className="text-yellow-500" size={18} />;
       case "completed": return <CheckCircle2 className="text-blue-500" size={18} />;
-      default: return <AlertCircle className="text-gray-500 dark:text-gray-400" size={18} />;
+      default: return <Clock className="text-gray-500 dark:text-gray-400" size={18} />;
     }
   };
 
@@ -175,7 +177,7 @@ function MyBookings() {
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Tag size={14} />
@@ -187,15 +189,34 @@ function MyBookings() {
                     </div>
                   </div>
                   
-                  {(booking.status === "pending" || booking.status === "confirmed") && (
-                    <button
-                      onClick={() => handleRequestCancellation(booking._id)}
-                      className="text-red-500 hover:text-red-700 text-sm font-bold transition flex items-center gap-1"
-                    >
-                      <XCircle size={18} />
-                      Request Cancellation
-                    </button>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {booking.status === "confirmed" && !booking.paymentId && (
+                      <button
+                        onClick={() => navigate(`/payment/${booking._id}`)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition active:scale-[0.98] flex items-center gap-2"
+                      >
+                        <CreditCard size={18} />
+                        Pay Now
+                      </button>
+                    )}
+
+                    {booking.paymentId && (
+                      <span className="text-green-600 dark:text-green-400 text-sm font-bold flex items-center gap-1">
+                        <CheckCircle2 size={16} />
+                        Paid
+                      </span>
+                    )}
+                    
+                    {(booking.status === "pending" || booking.status === "confirmed") && (
+                      <button
+                        onClick={() => handleRequestCancellation(booking._id)}
+                        className="text-red-500 hover:text-red-700 text-sm font-bold transition flex items-center gap-1"
+                      >
+                        <XCircle size={18} />
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

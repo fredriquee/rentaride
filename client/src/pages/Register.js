@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { User, Mail, Lock, UserPlus, ShieldCheck } from "lucide-react";
+import { User, Mail, Lock, UserPlus, ShieldCheck, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState("renter");
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -18,7 +19,7 @@ function Register() {
     setLoading(true);
 
     try {
-      await register(name, email, password, role);
+      await register(name, email, password, phone, role);
       toast.success("Account created successfully!");
       navigate("/");
     } catch (error) {
@@ -87,6 +88,22 @@ function Register() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Phone Number (Optional)</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Phone size={18} />
+              </div>
+              <input
+                type="tel"
+                className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="+977 98XXXXXXXX"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
             </div>
           </div>

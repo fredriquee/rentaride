@@ -27,6 +27,12 @@ const bookingSchema = new mongoose.Schema({
   },
   cancellationReason: {
     type: String
+  },
+  
+  // Payment relationship
+  paymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Payment"
   }
 }, { timestamps: true });
 
