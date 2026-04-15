@@ -1,42 +1,50 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Car, ArrowLeft, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 const UserProfile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { userId } = useParams();
+  const [profileUser, setProfileUser] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const displayUserId = userId || user?._id;
+
   useEffect(() => {
-    const fetchUserVehicles = async () => {
+    const fetchUserProfile = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `http://localhost:5000/api/vehicles/user/${user.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
+        // Fetch user profile info
+        const userResponse = await axios.get(
+          `http://localhost:5000/api/vehicles/user/${displayUserId}`
         );
-        setVehicles(response.data || []);
+
+        // Get user name from the first vehicle's owner data, or set a default
+        if (userResponse.data.length > 0) {
+          setProfileUser(userResponse.data[0].owner);
+        }
+
+        // Fetch vehicles for this user
+        setVehicles(userResponse.data || []);
         setError(null);
       } catch (err) {
-        console.error("Error fetching user vehicles:", err);
-        setError(err.response?.data?.message || "Failed to load vehicles");
+        console.error("Error fetching user profile:", err);
+        setError(err.response?.data?.message || "Failed to load profile");
       } finally {
         setLoading(false);
       }
     };
 
-    if (user?.id) {
-      fetchUserVehicles();
+    if (displayUserId) {
+      fetchUserProfile();
     }
-  }, [user]);
+  }, [displayUserId]);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -53,12 +61,12 @@ const UserProfile = () => {
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              {user?.name}
+              {profileUser?.name || "Profile"}
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">{user?.email}</p>
+            <p className="text-gray-600 dark:text-gray-400">{profileUser?.email}</p>
           </div>
           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 dark:bg-blue-500 text-white font-bold text-xl">
-            {user?.name
+            {profileUser?.name
               ?.split(" ")
               .map((word) => word[0])
               .join("")
@@ -116,8 +124,8 @@ const UserProfile = () => {
                 <div className="relative h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
                   {vehicle.image ? (
                     <img
-                      src={vehicle.image}
-                      alt={vehicle.name}
+                      src={vehicle.image.startsWith('http') ? vehicle.image : `http://localhost:5000${vehicle.image}`}
+                      alt={vehicle.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   ) : (
@@ -126,36 +134,37 @@ const UserProfile = () => {
                     </div>
                   )}
                   <div className="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    ${vehicle.pricePerDay}/day
+                    Rs {vehicle.pricePerDay}/day
                   </div>
                 </div>
 
                 {/* Vehicle Info */}
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    {vehicle.name}
+                    {vehicle.title}
                   </h3>
 
                   <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium">Model</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">Type</p>
                       <p className="text-gray-900 dark:text-white font-semibold">
-                        {vehicle.model}
+                        {vehicle.type}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-500 dark:text-gray-400 font-medium">Year</p>
+                      <p className="text-gray-500 dark:text-gray-400 font-medium">Location</p>
                       <p className="text-gray-900 dark:text-white font-semibold">
-                        {vehicle.year}
+                        {vehicle.location}
                       </p>
                     </div>
                   </div>
 
-                  {vehicle.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                      {vehicle.description}
+                  <div className="mb-3 text-sm">
+                    <p className="text-gray-500 dark:text-gray-400 font-medium">Status</p>
+                    <p className="text-gray-900 dark:text-white font-semibold capitalize px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded inline-block">
+                      {vehicle.status || "available"}
                     </p>
-                  )}
+                  </div>
 
                   <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     View Details

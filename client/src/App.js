@@ -29,7 +29,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (user && user.role === "owner") {
+      if (user && user.currentRole === "owner") {
         try {
           const token = localStorage.getItem("token");
           const res = await axios.get("http://localhost:5000/api/bookings/owner/notifications", {
@@ -74,7 +74,7 @@ const Navbar = () => {
                   My Bookings
                 </Link>
               )}
-              {user?.role === "owner" && (
+              {user?.currentRole === "owner" && (
                 <Link to="/my-vehicles" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1.5">
                   <Car size={18} />
                   My Vehicles
@@ -86,7 +86,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               {user ? (
                 <>
-                  {user.role === "owner" && (
+                  {user.currentRole === "owner" && (
                     <div className="flex items-center gap-2 sm:gap-4 mr-2">
                       <Link to="/owner-dashboard" className="relative p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all group" title="Manage Bookings">
                         <CalendarDays size={20} />
@@ -154,6 +154,7 @@ function App() {
                   <Route path="/superadmin" element={<ProtectedRoute component={SuperAdminDashboard} requiredRole="admin" />} />
                   <Route path="/add-vehicle" element={<ProtectedRoute component={AddVehicle} requiredRole="owner" />} />
                   <Route path="/book/:id" element={<ProtectedRoute component={BookingPage} />} />
+                  <Route path="/profile/:userId" element={<UserProfile />} />
                   <Route path="/profile" element={<ProtectedRoute component={UserProfile} />} />
                   <Route path="/settings" element={<ProtectedRoute component={Settings} />} />
                 </Routes>

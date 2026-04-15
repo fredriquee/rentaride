@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { MapPin, Tag, Calendar, Car } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function VehicleList() {
@@ -60,7 +60,7 @@ function VehicleList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {vehicles.map((v) => (
           <div key={v._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-md transition group">
-            <div className="h-48 bg-gray-200 relative overflow-hidden">
+            <div className="h-72 bg-gray-200 relative overflow-hidden">
               {v.image ? (
                 <img
                   src={v.image.startsWith('http') ? v.image : `http://localhost:5000${v.image}`}
@@ -104,7 +104,13 @@ function VehicleList() {
 
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="text-xs text-gray-400">
-                  Listed by <span className="font-medium text-gray-600 dark:text-gray-400">{v.owner?.name}</span>
+                  Listed by{" "}
+                  <Link
+                    to={`/profile/${v.owner?._id}`}
+                    className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  >
+                    {v.owner?.name}
+                  </Link>
                 </div>
                 <button
                   onClick={() => handleBookingClick(v)}
