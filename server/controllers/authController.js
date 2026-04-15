@@ -89,12 +89,6 @@ exports.switchRole = asyncHandler(async (req, res) => {
     throw new Error("Invalid role");
   }
 
-  // If user is trying to switch to owner, check if they have owner role
-  if (newRole === "owner" && req.user.role !== "owner") {
-    res.status(403);
-    throw new Error("You don't have owner permissions");
-  }
-
   const user = await User.findByIdAndUpdate(
     req.user._id,
     { currentRole: newRole },

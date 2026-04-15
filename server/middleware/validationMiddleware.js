@@ -26,7 +26,7 @@ const validateRegister = [
     .withMessage("Name must not exceed 100 characters"),
   body("role")
     .optional()
-    .isIn(["user", "owner"])
+    .isIn(["renter", "owner"])
     .withMessage("Invalid role"),
 ];
 
@@ -61,14 +61,14 @@ const validateVehicle = [
 ];
 
 const validateBooking = [
-  body("vehicleId")
+  body("vehicle")
     .isMongoId()
     .withMessage("Invalid vehicle ID"),
   body("startDate")
-    .isISO8601()
+    .matches(/^\d{4}-\d{2}-\d{2}/)
     .withMessage("Invalid start date format"),
   body("endDate")
-    .isISO8601()
+    .matches(/^\d{4}-\d{2}-\d{2}/)
     .withMessage("Invalid end date format"),
 ];
 

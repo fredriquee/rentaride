@@ -42,4 +42,13 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = { authMiddleware, adminMiddleware };
+const ownerMiddleware = (req, res, next) => {
+  if (req.user && req.user.currentRole === "owner") {
+    next();
+  } else {
+    res.status(403);
+    throw new Error("You must be in Owner mode to perform this action. Switch to Owner mode in Settings.");
+  }
+};
+
+module.exports = { authMiddleware, adminMiddleware, ownerMiddleware };
