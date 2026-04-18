@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  CheckCircle, XCircle, Clock, User, CalendarDays, Car, IndianRupee, AlertTriangle, Check, TrendingUp, Plus, Eye
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from "recharts";
+import {
+  CheckCircle, XCircle, User, CalendarDays, Car, IndianRupee, AlertTriangle, Check, TrendingUp, Plus, Eye
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
