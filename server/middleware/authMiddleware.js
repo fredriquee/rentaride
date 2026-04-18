@@ -18,7 +18,9 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await User.findById(decoded.id).select("-password");
+      // Handle both old tokens (with 'id') and new tokens (with '_id')
+      const userId = decoded._id || decoded.id;
+      req.user = await User.findById(userId).select("-password");
 
       next();
     } catch (error) {

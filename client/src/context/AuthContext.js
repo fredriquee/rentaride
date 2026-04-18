@@ -13,6 +13,10 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const userData = JSON.parse(atob(token.split(".")[1]));
+        // Handle both old (id) and new (_id) token formats
+        if (userData.id && !userData._id) {
+          userData._id = userData.id;
+        }
         // Merge currentRole from localStorage
         if (currentRole) {
           userData.currentRole = currentRole;
@@ -34,6 +38,10 @@ export const AuthProvider = ({ children }) => {
     });
     localStorage.setItem("token", data.token);
     localStorage.setItem("currentRole", data.currentRole);
+    // Normalize user data - handle both id and _id
+    if (data.id && !data._id) {
+      data._id = data.id;
+    }
     setUser(data);
     return data;
   };
@@ -48,6 +56,10 @@ export const AuthProvider = ({ children }) => {
     });
     localStorage.setItem("token", data.token);
     localStorage.setItem("currentRole", data.currentRole);
+    // Normalize user data - handle both id and _id
+    if (data.id && !data._id) {
+      data._id = data.id;
+    }
     setUser(data);
     return data;
   };
@@ -61,7 +73,11 @@ export const AuthProvider = ({ children }) => {
     // Save the new currentRole to localStorage
     localStorage.setItem("currentRole", data.currentRole);
     // Update user with new currentRole
-    const updatedUser = { ...user, ...data };
+    let normalizedData = { ...data };
+    if (normalizedData.id && !normalizedData._id) {
+      normalizedData._id = normalizedData.id;
+    }
+    const updatedUser = { ...user, ...normalizedData };
     setUser(updatedUser);
     return data;
   };

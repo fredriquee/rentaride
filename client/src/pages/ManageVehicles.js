@@ -24,7 +24,7 @@ function ManageVehicles() {
 
   const fetchVehicles = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/vehicles/owner/myVehicles", {
+      const res = await axios.get("http://localhost:5000/api/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(res.data);

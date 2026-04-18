@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Car, LayoutDashboard, PlusCircle, ShieldAlert, CalendarDays } from "lucide-react";
+import { Car, LayoutDashboard, PlusCircle, ShieldAlert, CalendarDays, Menu, X } from "lucide-react";
 import MyBookings from "./pages/MyBookings";
 import UserDashboard from "./pages/UserDashboard";
 import VehicleList from "./pages/VehicleList";
@@ -27,6 +27,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [ownerNotificationCount, setOwnerNotificationCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -58,7 +59,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo Section */}
-          <Link to="/" className="flex items-center gap-2 text-2xl font-bold text-blue-600 dark:text-blue-400 group">
+          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 text-2xl font-bold text-blue-600 dark:text-blue-400 group">
             <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg group-hover:scale-110 transition-transform duration-300">
               <Car size={28} />
             </div>
@@ -66,9 +67,9 @@ const Navbar = () => {
           </Link>
 
           {/* Nav Links & Actions */}
-          <div className="flex items-center gap-2 sm:gap-6">
+          <div className="hidden md:flex items-center gap-2 sm:gap-6">
             {/* General Links Group */}
-            <div className="hidden md:flex items-center gap-6 pr-6 border-r border-gray-200 dark:border-gray-800">
+            <div className="flex items-center gap-6 pr-6 border-r border-gray-200 dark:border-gray-800">
               <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</Link>
               {user && user.currentRole !== "owner" && (
                 <Link to="/dashboard" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1.5">
@@ -136,7 +137,92 @@ const Navbar = () => {
               )}
             </div>
           </div>
+
+          {/* Mobile Hamburger Menu Button */}
+          <div className="flex md:hidden items-center gap-3">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 py-4 space-y-3">
+            {/* Navigation Links */}
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors">Home</Link>
+            
+            {user && user.currentRole !== "owner" && (
+              <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <LayoutDashboard size={16} />
+                Dashboard
+              </Link>
+            )}
+            
+            {user && (
+              <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <CalendarDays size={16} />
+                My Bookings
+              </Link>
+            )}
+            
+            {user?.currentRole === "owner" && (
+              <>
+                <Link to="/my-vehicles" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                  <Car size={16} />
+                  My Vehicles
+                </Link>
+                <Link to="/owner-dashboard" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors flex items-center gap-2">
+                  <LayoutDashboard size={16} />
+                  Owner Dashboard
+                  {ownerNotificationCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                      {ownerNotificationCount}
+                    </span>
+                  )}
+                </Link>
+                <Link to="/add-vehicle" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium transition flex items-center gap-2">
+                  <PlusCircle size={16} />
+                  Add Vehicle
+                </Link>
+              </>
+            )}
+
+            {user?.role === "admin" && (
+              <Link to="/superadmin" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg font-medium transition flex items-center gap-2">
+                <ShieldAlert size={16} />
+                Super Admin
+              </Link>
+            )}
+
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
+              <Link to="/settings" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors">Settings</Link>
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors">Profile</Link>
+            </div>
+
+            {user ? (
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg font-medium transition-colors"
+              >
+                Logout
+              </button>
+            ) : (
+              <div className="space-y-2 pt-2">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors">Login</Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition">Register</Link>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );

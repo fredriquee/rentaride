@@ -76,7 +76,7 @@ const generateToken = (id, role, name, email, phone) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined in environment variables");
   }
-  return jwt.sign({ id, role, name, email, phone }, process.env.JWT_SECRET, {
+  return jwt.sign({ _id: id, role, name, email, phone }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 };

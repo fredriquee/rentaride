@@ -100,11 +100,11 @@ function BookingPage() {
   if (!vehicle) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border dark:border-gray-700 border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-3xl shadow-lg sm:shadow-xl border dark:border-gray-700 border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
         {/* Left Side: Vehicle Info */}
-        <div className="md:w-1/2 bg-gray-50 dark:bg-gray-900 p-8 border-r border-gray-100 dark:border-gray-700">
-          <div className="relative rounded-2xl overflow-hidden mb-6 aspect-video bg-gray-200 shadow-inner">
+        <div className="md:w-1/2 bg-gray-50 dark:bg-gray-900 p-4 sm:p-6 md:p-8 border-b md:border-b-0 md:border-r border-gray-100 dark:border-gray-700">
+          <div className="relative rounded-lg sm:rounded-2xl overflow-hidden mb-4 sm:mb-6 aspect-video bg-gray-200 shadow-inner">
             {vehicle.image ? (
               <img
                 src={vehicle.image.startsWith('http') ? vehicle.image : `http://localhost:5000${vehicle.image}`}
@@ -113,39 +113,41 @@ function BookingPage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <Car size={64} />
+                <Car size={48} className="sm:block hidden" />
+                <Car size={32} className="sm:hidden block" />
               </div>
             )}
-            <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg font-bold text-blue-600 border dark:border-gray-700 border-gray-200">
+            <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white dark:bg-gray-800 px-2 sm:px-4 py-1 sm:py-2 rounded-lg font-bold text-xs sm:text-base text-blue-600 border dark:border-gray-700 border-gray-200">
               Rs {vehicle.pricePerDay}/day
             </div>
           </div>
 
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">{vehicle.title}</h2>
-          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-6">
-            <span className="px-3 py-1 bg-white dark:bg-gray-800 rounded-full border dark:border-gray-700 border-gray-200 dark:border-gray-700 text-xs font-semibold uppercase tracking-wider">{vehicle.type}</span>
-            <div className="flex items-center gap-1 text-sm">
-              <MapPin size={16} className="text-blue-500" />
-              <span>{typeof vehicle.location === 'string' ? vehicle.location : vehicle.location?.address || 'N/A'}</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-100 mb-2">{vehicle.title}</h2>
+          <div className="flex flex-wrap items-center gap-2 text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
+            <span className="px-2 sm:px-3 py-1 bg-white dark:bg-gray-800 rounded-full border dark:border-gray-700 border-gray-200 dark:border-gray-700 text-xs font-semibold uppercase tracking-wider">{vehicle.type}</span>
+            <div className="flex items-center gap-1 text-xs sm:text-sm">
+              <MapPin size={14} className="sm:block text-blue-500 flex-shrink-0" />
+              <span className="line-clamp-1">{typeof vehicle.location === 'string' ? vehicle.location : vehicle.location?.address || 'N/A'}</span>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="bg-gray-50 border dark:border-gray-700 border-gray-200 p-4 rounded-lg flex items-start gap-3">
-              <Info className="text-gray-600 dark:text-gray-400 mt-1 shrink-0" size={20} />
-              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 border-gray-200 dark:border-gray-700 p-3 sm:p-4 rounded-lg flex items-start gap-3">
+              <Info className="text-gray-600 dark:text-gray-400 mt-1 shrink-0" size={18} />
+              <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 Bookings are subject to owner approval. You will be notified once the owner confirms your request.
               </p>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-3">
-                <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-xl text-gray-600 dark:text-gray-400">
-                  <Clock size={20} />
+            <div className="flex items-center justify-between p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-lg sm:rounded-2xl border dark:border-gray-700 border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg sm:rounded-xl text-gray-600 dark:text-gray-400">
+                  <Clock size={18} className="sm:block hidden" />
+                  <Clock size={16} className="sm:hidden block" />
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 font-medium">Pickup Time</p>
-                  <p className="text-sm font-bold text-gray-700 dark:text-gray-300">10:00 AM onwards</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300">10:00 AM onwards</p>
                 </div>
               </div>
             </div>

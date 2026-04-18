@@ -8,9 +8,11 @@ import {
   CheckCircle, XCircle, User, CalendarDays, Car, IndianRupee, AlertTriangle, Check, TrendingUp, Plus, Eye
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function OwnerDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [stats, setStats] = useState({
@@ -24,6 +26,14 @@ function OwnerDashboard() {
   const [vehicleStats, setVehicleStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Protect this page - only owners can access
+  useEffect(() => {
+    if (!user || user.currentRole !== "owner") {
+      toast.error("You must be in Owner mode to access this page");
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     fetchOwnerDashboardData();
@@ -52,7 +62,7 @@ function OwnerDashboard() {
       const pending = allBookings.filter(b => b.status === 'pending' || b.status === 'cancellation_requested').length;
       const completed = allBookings.filter(b => b.status === 'completed').length;
       const confirmed = allBookings.filter(b => b.status === 'confirmed').length;
-      const active = allVehicles.filter(v => v.status === 'active').length;
+      const active = allVehicles.filter(v => v.status === 'available').length;
 
       let totalEarnings = 0;
       allBookings.forEach(booking => {
@@ -182,75 +192,80 @@ function OwnerDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* Total Earnings */}
-        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-xl p-6 border border-green-200 dark:border-green-800">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-900/30 rounded-lg sm:rounded-xl p-3 sm:p-6 border border-green-200 dark:border-green-800">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-green-700 dark:text-green-300 text-sm font-medium">Total Earnings</p>
-              <p className="text-3xl font-bold text-green-900 dark:text-green-100 mt-1">
+              <p className="text-green-700 dark:text-green-300 text-xs sm:text-sm font-medium">Total Earnings</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-900 dark:text-green-100 mt-1">
                 Rs {stats.totalEarnings.toLocaleString()}
               </p>
             </div>
-            <IndianRupee className="text-green-600 dark:text-green-400" size={24} />
+            <IndianRupee className="text-green-600 dark:text-green-400 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-green-700 dark:text-green-300">From completed bookings</p>
+          <IndianRupee className="text-green-600 dark:text-green-400 sm:hidden" size={18} />
+          <p className="text-xs text-green-700 dark:text-green-300 hidden sm:block">From completed bookings</p>
         </div>
 
         {/* Pending Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Pending Actions</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.pendingBookings}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">Pending Actions</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.pendingBookings}</p>
             </div>
-            <AlertTriangle className="text-yellow-500" size={24} />
+            <AlertTriangle className="text-yellow-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Require your attention</p>
+          <AlertTriangle className="text-yellow-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Require your attention</p>
         </div>
 
         {/* Completed Bookings */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Completed Bookings</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.completedBookings}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">Completed Bookings</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.completedBookings}</p>
             </div>
-            <CheckCircle className="text-green-500" size={24} />
+            <CheckCircle className="text-green-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total rentals completed</p>
+          <CheckCircle className="text-green-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Total rentals completed</p>
         </div>
 
         {/* Active Vehicles */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Active Vehicles</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.activeVehicles}/{vehicles.length}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">Active Vehicles</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.activeVehicles}/{vehicles.length}</p>
             </div>
-            <Car className="text-blue-500" size={24} />
+            <Car className="text-blue-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Vehicles for rent</p>
+          <Car className="text-blue-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Vehicles for rent</p>
         </div>
 
         {/* Acceptance Rate */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700 col-span-2 sm:col-span-1">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Acceptance Rate</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.acceptanceRate}%</p>
+              <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm font-medium">Acceptance Rate</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.acceptanceRate}%</p>
             </div>
-            <TrendingUp className="text-blue-500" size={24} />
+            <TrendingUp className="text-blue-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Bookings confirmed/completed</p>
+          <TrendingUp className="text-blue-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Bookings confirmed/completed</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-2 sm:gap-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-6 py-3 font-medium border-b-2 transition ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
             activeTab === "overview"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
@@ -260,7 +275,7 @@ function OwnerDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
-          className={`px-6 py-3 font-medium border-b-2 transition ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
             activeTab === "bookings"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
@@ -270,7 +285,7 @@ function OwnerDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("vehicles")}
-          className={`px-6 py-3 font-medium border-b-2 transition ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
             activeTab === "vehicles"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
@@ -282,27 +297,27 @@ function OwnerDashboard() {
 
       {/* Overview Tab */}
       {activeTab === "overview" && (
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Revenue Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Revenue Trend (6 Months)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyRevenue}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Revenue Trend (6 Months)</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <LineChart data={monthlyRevenue} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="month" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "none", borderRadius: "8px", color: "#fff" }} />
-                  <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} dot={{ fill: "#10b981", r: 5 }} />
+                  <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={2} dot={{ fill: "#10b981", r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
             {/* Vehicle Performance */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Vehicle Earnings</h3>
-              <div className="space-y-4 max-h-80 overflow-y-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Vehicle Earnings</h3>
+              <div className="space-y-3 max-h-64 sm:max-h-80 overflow-y-auto">
                 {vehicleStats.length > 0 ? (
                   vehicleStats
                     .sort((a, b) => b.earnings - a.earnings)
@@ -354,15 +369,15 @@ function OwnerDashboard() {
               <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-4">Vehicle Status</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Active</span>
+                  <span className="text-gray-700 dark:text-gray-300">Available</span>
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {vehicles.filter(v => v.status === 'active').length}
+                    {vehicles.filter(v => v.status === 'available').length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700 dark:text-gray-300">Inactive</span>
+                  <span className="text-gray-700 dark:text-gray-300">Unavailable</span>
                   <span className="font-bold text-gray-900 dark:text-white">
-                    {vehicles.filter(v => v.status === 'inactive').length}
+                    {vehicles.filter(v => v.status === 'unavailable').length}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

@@ -94,22 +94,23 @@ function SuperAdminDashboard() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="bg-red-100 p-3 rounded-xl text-red-600">
-          <ShieldCheck size={28} />
+    <div className="px-3 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6 sm:mb-8">
+        <div className="bg-red-100 p-2 sm:p-3 rounded-xl text-red-600">
+          <ShieldCheck size={24} className="sm:block hidden" />
+          <ShieldCheck size={20} className="sm:hidden block" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Superadmin Dashboard</h2>
-          <p className="text-gray-500 dark:text-gray-400">Manage all platform data</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">Superadmin Dashboard</h2>
+          <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Manage all platform data</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b mb-6">
+      {/* Tabs - Scrollable on mobile */}
+      <div className="flex gap-2 sm:gap-4 border-b mb-4 sm:mb-6 overflow-x-auto">
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+          className={`flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap transition ${
             activeTab === "users" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
           }`}
         >
@@ -117,7 +118,7 @@ function SuperAdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("vehicles")}
-          className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+          className={`flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap transition ${
             activeTab === "vehicles" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
           }`}
         >
@@ -125,7 +126,7 @@ function SuperAdminDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
-          className={`flex items-center gap-2 px-6 py-3 font-medium transition ${
+          className={`flex items-center gap-2 px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap transition ${
             activeTab === "bookings" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300"
           }`}
         >
@@ -134,7 +135,7 @@ function SuperAdminDashboard() {
       </div>
 
       {/* Content */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-x-auto">
         {activeTab === "users" && (
           <table className="w-full text-left border-collapse">
             <thead>

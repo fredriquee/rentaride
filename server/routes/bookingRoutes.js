@@ -21,15 +21,16 @@ router.post("/", authMiddleware, validateBooking, handleValidationErrors, create
 // @access  Private
 router.get("/my", authMiddleware, getUserBookings);
 
+// @route   GET /api/bookings/owner/notifications
+// @desc    Get count of pending/cancellation_requested bookings for owner
+// @access  Private/Owner
+// NOTE: Must come before /owner route to prevent :id from matching "notifications"
+router.get("/owner/notifications", authMiddleware, ownerMiddleware, getOwnerNotifications);
+
 // @route   GET /api/bookings/owner
 // @desc    Get owner bookings
 // @access  Private/Owner
 router.get("/owner", authMiddleware, ownerMiddleware, getOwnerBookings);
-
-// @route   GET /api/bookings/owner/notifications
-// @desc    Get count of pending/cancellation_requested bookings for owner
-// @access  Private/Owner
-router.get("/owner/notifications", authMiddleware, ownerMiddleware, getOwnerNotifications);
 
 // @route   PUT /api/bookings/:id
 // @desc    Update booking status

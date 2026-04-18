@@ -51,18 +51,18 @@ function VehicleList() {
   }
 
   return (
-    <div>
+    <div className="px-3 sm:px-4 md:px-0">
       {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Available Vehicles</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">{vehicles.length} vehicles found</p>
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-200">Available Vehicles</h2>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2">{vehicles.length} vehicles found</p>
       </div>
 
       {/* Vehicles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
         {vehicles.map((v) => (
-          <div key={v._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-md transition group">
-            <div className="h-72 bg-gray-200 relative overflow-hidden">
+          <div key={v._id} className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-md transition group">
+            <div className="h-48 sm:h-60 md:h-72 bg-gray-200 relative overflow-hidden">
               {v.image ? (
                 <img
                   src={v.image.startsWith('http') ? v.image : `http://localhost:5000${v.image}`}
@@ -73,40 +73,40 @@ function VehicleList() {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <Car size={48} />
+                  <Car size={40} className="sm:block" />
                 </div>
               )}
-              <div className="absolute top-4 right-4 bg-white dark:bg-gray-800/90 backdrop-blur px-3 py-1 rounded-full text-sm font-bold text-blue-600 shadow-sm">
+              <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white dark:bg-gray-800/90 backdrop-blur px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold text-blue-600 shadow-sm">
                 Rs {v.pricePerDay}/day
               </div>
               {v.status !== "available" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-xl">
-                  <span className="px-4 py-2 bg-red-500 text-white font-bold rounded-lg capitalize">
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-lg sm:rounded-xl">
+                  <span className="px-3 sm:px-4 py-1 sm:py-2 bg-red-500 text-white font-bold text-sm sm:text-base rounded-lg capitalize">
                     {v.status}
                   </span>
                 </div>
               )}
             </div>
 
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
+            <div className="p-4 sm:p-6">
+              <div className="flex justify-between items-start mb-3 sm:mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{v.title}</h3>
-                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-sm">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">{v.title}</h3>
+                  <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
                     <Tag size={14} />
                     <span>{v.type}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
-                <MapPin size={16} className="text-blue-500" />
-                <span className="text-sm font-medium">
+              <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-4 sm:mb-6">
+                <MapPin size={14} className="sm:block text-blue-500 flex-shrink-0" />
+                <span className="text-xs sm:text-sm font-medium line-clamp-1">
                   {typeof v.location === 'string' ? v.location : v.location?.address}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between pt-4 border-t border-gray-200 dark:border-gray-700 gap-3 sm:gap-0">
                 <div className="text-xs text-gray-400">
                   Listed by{" "}
                   <Link
@@ -119,12 +119,12 @@ function VehicleList() {
                 <button
                   onClick={() => handleBookingClick(v)}
                   disabled={user?._id === v.owner?._id || v.status !== "available"}
-                  className={`px-6 py-2 rounded-lg font-bold transition ${
+                  className={`w-full sm:w-auto px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-bold transition ${
                     user?._id === v.owner?._id
                       ? "bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed"
                       : v.status !== "available"
                       ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-sm active:scale-95"
                   }`}
                 >
                   {user?._id === v.owner?._id ? "Your Vehicle" : v.status !== "available" ? `${v.status}` : "Book Now"}

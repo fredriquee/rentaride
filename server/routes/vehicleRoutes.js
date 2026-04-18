@@ -17,10 +17,14 @@ const upload = require("../middleware/uploadMiddleware");
 // Get all vehicles (public)
 router.get("/", getAllVehicles);
 
+// Get owner's vehicles (private, owner only)
+// NOTE: Must come before /:id and /user/:userId to prevent wildcard matching
+router.get("/my", authMiddleware, ownerMiddleware, getOwnerVehicles);
+
 // Get vehicles by specific user (public)
 router.get("/user/:userId", getVehiclesByUserId);
 
-// Get owner's vehicles (private, owner only)
+// Get owner's vehicles (legacy endpoint - kept for backward compatibility)
 router.get("/owner/myVehicles", authMiddleware, ownerMiddleware, getOwnerVehicles);
 
 // Get specific vehicle by ID (public)

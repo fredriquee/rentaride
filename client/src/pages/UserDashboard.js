@@ -130,75 +130,80 @@ function UserDashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {/* Completed Bookings */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Completed Rentals</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.completed}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Completed Rentals</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.completed}</p>
             </div>
-            <CheckCircle2 className="text-green-500" size={24} />
+            <CheckCircle2 className="text-green-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Total trips completed</p>
+          <CheckCircle2 className="text-green-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Total trips completed</p>
         </div>
 
         {/* Upcoming Rentals */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Upcoming Rentals</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.upcomingRentals}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Rentals</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.upcomingRentals}</p>
             </div>
-            <Clock className="text-blue-500" size={24} />
+            <Clock className="text-blue-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Scheduled trips</p>
+          <Clock className="text-blue-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Scheduled trips</p>
         </div>
 
         {/* Pending Actions */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Pending</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.pending}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Pending</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.pending}</p>
             </div>
-            <AlertCircle className="text-yellow-500" size={24} />
+            <AlertCircle className="text-yellow-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Need your attention</p>
+          <AlertCircle className="text-yellow-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Need your attention</p>
         </div>
 
         {/* Cancelled */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Cancelled</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.cancelled}</p>
+              <p className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Cancelled</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.cancelled}</p>
             </div>
-            <XCircle className="text-red-500" size={24} />
+            <XCircle className="text-red-500 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Cancelled bookings</p>
+          <XCircle className="text-red-500 sm:hidden" size={18} />
+          <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Cancelled bookings</p>
         </div>
 
         {/* Total Spent */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
-          <div className="flex items-start justify-between mb-3">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-900/30 rounded-lg sm:rounded-xl p-3 sm:p-6 border border-blue-200 dark:border-blue-800 col-span-2 sm:col-span-1">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:mb-3">
             <div>
-              <p className="text-blue-700 dark:text-blue-300 text-sm font-medium">Total Spent</p>
-              <p className="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-1">
+              <p className="text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-300">Total Spent</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-900 dark:text-blue-100 mt-1">
                 Rs {stats.totalSpent.toLocaleString()}
               </p>
             </div>
-            <IndianRupee className="text-blue-600 dark:text-blue-400" size={24} />
+            <IndianRupee className="text-blue-600 dark:text-blue-400 hidden sm:block" size={24} />
           </div>
-          <p className="text-xs text-blue-700 dark:text-blue-300">Across all bookings</p>
+          <IndianRupee className="text-blue-600 dark:text-blue-400 sm:hidden" size={18} />
+          <p className="text-xs text-blue-700 dark:text-blue-300 hidden sm:block">Across all bookings</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex gap-2 sm:gap-4 border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-6 py-3 font-medium border-b-2 transition ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
             activeTab === "overview"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
@@ -208,7 +213,7 @@ function UserDashboard() {
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
-          className={`px-6 py-3 font-medium border-b-2 transition ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
             activeTab === "bookings"
               ? "border-blue-600 text-blue-600 dark:text-blue-400"
               : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
@@ -222,15 +227,15 @@ function UserDashboard() {
       {activeTab === "overview" && (
         <div className="space-y-8">
           {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Monthly Bookings Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Booking Activity (6 Months)</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Booking Activity (6 Months)</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="month" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" />
+                  <XAxis dataKey="month" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <Tooltip contentStyle={{ backgroundColor: "#1f2937", border: "none", borderRadius: "8px", color: "#fff" }} />
                   <Bar dataKey="bookings" fill="#3b82f6" radius={[8, 8, 0, 0]} />
                 </BarChart>
@@ -238,13 +243,13 @@ function UserDashboard() {
             </div>
 
             {/* Booking Status Distribution */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Booking Status</h3>
+            <div className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl p-3 sm:p-6 border dark:border-gray-700">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Booking Status</h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</span>
-                    <span className="text-sm font-bold text-green-600 dark:text-green-400">{stats.completed}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Completed</span>
+                    <span className="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">{stats.completed}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
@@ -256,8 +261,8 @@ function UserDashboard() {
 
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending/Awaiting</span>
-                    <span className="text-sm font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Pending/Awaiting</span>
+                    <span className="text-xs sm:text-sm font-bold text-yellow-600 dark:text-yellow-400">{stats.pending}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
@@ -269,8 +274,8 @@ function UserDashboard() {
 
                 <div>
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Cancelled</span>
-                    <span className="text-sm font-bold text-red-600 dark:text-red-400">{stats.cancelled}</span>
+                    <span className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Cancelled</span>
+                    <span className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">{stats.cancelled}</span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div
