@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react
 import { Toaster } from "react-hot-toast";
 import { Car, LayoutDashboard, PlusCircle, ShieldAlert, CalendarDays } from "lucide-react";
 import MyBookings from "./pages/MyBookings";
+import UserDashboard from "./pages/UserDashboard";
 import VehicleList from "./pages/VehicleList";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -69,6 +70,12 @@ const Navbar = () => {
             {/* General Links Group */}
             <div className="hidden md:flex items-center gap-6 pr-6 border-r border-gray-200 dark:border-gray-800">
               <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Home</Link>
+              {user && user.currentRole !== "owner" && (
+                <Link to="/dashboard" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1.5">
+                  <LayoutDashboard size={18} />
+                  Dashboard
+                </Link>
+              )}
               {user && (
                 <Link to="/my-bookings" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1.5">
                   <LayoutDashboard size={18} />
@@ -147,6 +154,7 @@ function App() {
               <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
                 <Routes>
                   <Route path="/" element={<VehicleList />} />
+                  <Route path="/dashboard" element={<ProtectedRoute component={UserDashboard} />} />
                   <Route path="/my-bookings" element={<ProtectedRoute component={MyBookings} />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
