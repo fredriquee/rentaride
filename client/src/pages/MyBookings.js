@@ -185,7 +185,7 @@ function MyBookings() {
                     </div>
                     <div className="flex items-center gap-1">
                       <MapPin size={14} />
-                      <span>{booking.vehicle?.location}</span>
+                      <span>{typeof booking.vehicle?.location === 'string' ? booking.vehicle.location : booking.vehicle?.location?.address || 'N/A'}</span>
                     </div>
                   </div>
                   

@@ -25,7 +25,11 @@ function BookingPage() {
           // Fetch full vehicle details including owner
           const detailedRes = await axios.get(`http://localhost:5000/api/vehicles/${id}`);
           setVehicle(detailedRes.data);
-          setPickupLocation(detailedRes.data.location);
+          // Extract address from location object or use string directly
+          const locationAddress = typeof detailedRes.data.location === 'string' 
+            ? detailedRes.data.location 
+            : detailedRes.data.location?.address || '';
+          setPickupLocation(locationAddress);
         } else {
           toast.error("Vehicle not found");
           navigate("/");
@@ -122,7 +126,7 @@ function BookingPage() {
             <span className="px-3 py-1 bg-white dark:bg-gray-800 rounded-full border dark:border-gray-700 border-gray-200 dark:border-gray-700 text-xs font-semibold uppercase tracking-wider">{vehicle.type}</span>
             <div className="flex items-center gap-1 text-sm">
               <MapPin size={16} className="text-blue-500" />
-              <span>{vehicle.location}</span>
+              <span>{typeof vehicle.location === 'string' ? vehicle.location : vehicle.location?.address || 'N/A'}</span>
             </div>
           </div>
 

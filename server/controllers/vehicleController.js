@@ -13,9 +13,9 @@ exports.addVehicle = asyncHandler(async (req, res) => {
   console.log("Request files:", req.files);
 
   // Validate required fields
-  if (!title || !type || !pricePerDay || !location) {
+  if (!title || !type || !pricePerDay) {
     res.status(400);
-    throw new Error("Please provide all required fields: title, type, pricePerDay, location");
+    throw new Error("Please provide all required fields: title, type, pricePerDay");
   }
 
   // Validate price is positive
@@ -35,7 +35,7 @@ exports.addVehicle = asyncHandler(async (req, res) => {
     title,
     type,
     pricePerDay: parseFloat(pricePerDay),
-    location,
+    location: location || null,
     image: image || (images.length > 0 ? images[0] : null),
     images: images.length > 0 ? images : [],
     owner: req.user._id,
@@ -197,3 +197,4 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
   await vehicle.deleteOne();
   res.json({ message: "Vehicle removed" });
 });
+

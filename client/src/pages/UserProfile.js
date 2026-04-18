@@ -151,7 +151,7 @@ const UserProfile = () => {
                     <div>
                       <p className="text-gray-500 dark:text-gray-400 font-medium">Location</p>
                       <p className="text-gray-900 dark:text-white font-semibold">
-                        {vehicle.location}
+                        {typeof vehicle.location === 'string' ? vehicle.location : vehicle.location?.address || 'N/A'}
                       </p>
                     </div>
                   </div>

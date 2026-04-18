@@ -177,16 +177,15 @@ function AddVehicle() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Location</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Location (Optional)</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <MapPin size={18} />
               </div>
               <input
                 type="text"
-                required
                 className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                placeholder="e.g. Panjim, Goa"
+                placeholder="e.g. Kathmandu, Nepal"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />

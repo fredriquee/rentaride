@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon, Phone } from "lucide-react";
+import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon, Phone, MapPin } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import StatusToggle from "../components/StatusToggle";
@@ -11,6 +11,7 @@ function ManageVehicles() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [editLocation, setEditLocation] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -37,20 +38,31 @@ function ManageVehicles() {
 
   const startEdit = (vehicle) => {
     setEditingId(vehicle._id);
+    
+    // Handle location data - can be string or object
+    let locationAddress = "";
+    if (typeof vehicle.location === "string") {
+      locationAddress = vehicle.location;
+    } else if (vehicle.location?.address) {
+      locationAddress = vehicle.location.address;
+    }
+    
     setEditForm({
       title: vehicle.title,
       type: vehicle.type,
       pricePerDay: vehicle.pricePerDay,
-      location: vehicle.location,
+      location: locationAddress,
       status: vehicle.status,
       currentImage: vehicle.image,
     });
+    setEditLocation(locationAddress);
     setUploadedFiles([]);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditForm({});
+    setEditLocation("");
     setUploadedFiles([]);
   };
 
@@ -91,7 +103,7 @@ function ManageVehicles() {
       formData.append("title", editForm.title);
       formData.append("type", editForm.type);
       formData.append("pricePerDay", editForm.pricePerDay);
-      formData.append("location", editForm.location);
+      formData.append("location", editLocation || editForm.location);
       formData.append("status", editForm.status);
 
       uploadedFiles.forEach((fileObj) => {
@@ -106,6 +118,7 @@ function ManageVehicles() {
 
       toast.success("Vehicle updated successfully!");
       setEditingId(null);
+      setEditLocation("");
       setUploadedFiles([]);
       fetchVehicles();
     } catch (error) {
@@ -250,16 +263,22 @@ function ManageVehicles() {
                       />
                     </div>
 
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         Location
                       </label>
-                      <input
-                        type="text"
-                        value={editForm.location}
-                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                          <MapPin size={18} />
+                        </div>
+                        <input
+                          type="text"
+                          value={editLocation}
+                          onChange={(e) => setEditLocation(e.target.value)}
+                          placeholder="e.g. Kathmandu, Nepal"
+                          className="w-full pl-10 px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                        />
+                      </div>
                     </div>
 
                     <div className="md:col-span-2">
@@ -440,7 +459,7 @@ function ManageVehicles() {
                         <div>
                           <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{vehicle.title}</h3>
                           <p className="text-gray-500 dark:text-gray-400 text-sm">
-                            {vehicle.type} • {vehicle.location}
+                            {vehicle.type} • {typeof vehicle.location === 'string' ? vehicle.location : vehicle.location?.address || 'N/A'}
                           </p>
                         </div>
                         <span className="text-2xl font-bold text-blue-600">Rs {vehicle.pricePerDay}/day</span>

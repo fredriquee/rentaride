@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { MapPin, Tag, Calendar, Car } from "lucide-react";
+import { MapPin, Tag, Car } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -52,11 +52,13 @@ function VehicleList() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      {/* Header */}
+      <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Available Vehicles</h2>
-        <p className="text-gray-500 dark:text-gray-400">{vehicles.length} vehicles found</p>
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">{vehicles.length} vehicles found</p>
       </div>
 
+      {/* Vehicles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {vehicles.map((v) => (
           <div key={v._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-md transition group">
@@ -99,7 +101,9 @@ function VehicleList() {
 
               <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 mb-6">
                 <MapPin size={16} className="text-blue-500" />
-                <span className="text-sm font-medium">{v.location}</span>
+                <span className="text-sm font-medium">
+                  {typeof v.location === 'string' ? v.location : v.location?.address}
+                </span>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t">

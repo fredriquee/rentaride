@@ -38,13 +38,23 @@ const Settings = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      await axios.put(
+      const { data } = await axios.put(
         "http://localhost:5000/api/auth/update-profile",
         { name, phone },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+      // Save the new token and update user context
+      localStorage.setItem("token", data.token);
+      // Update the user state by decoding the new token
+      const userData = JSON.parse(atob(data.token.split(".")[1]));
+      if (user?.currentRole) {
+        userData.currentRole = user.currentRole;
+      }
+      // Manually update by re-setting the user - this will be caught by AuthContext
+      // For now, we'll reload to ensure consistency
+      window.location.reload();
       toast.success("Profile updated successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update profile");

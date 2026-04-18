@@ -34,7 +34,7 @@ exports.register = asyncHandler(async (req, res) => {
       phone: user.phone,
       role: user.role,
       currentRole: user.currentRole,
-      token: generateToken(user._id, user.role, user.name, user.email),
+      token: generateToken(user._id, user.role, user.name, user.email, user.phone),
     });
   } else {
     res.status(400);
@@ -64,7 +64,7 @@ exports.login = asyncHandler(async (req, res) => {
       phone: user.phone,
       role: user.role,
       currentRole: user.currentRole,
-      token: generateToken(user._id, user.role, user.name, user.email),
+      token: generateToken(user._id, user.role, user.name, user.email, user.phone),
     });
   } else {
     res.status(401);
@@ -72,11 +72,11 @@ exports.login = asyncHandler(async (req, res) => {
   }
 });
 
-const generateToken = (id, role, name, email) => {
+const generateToken = (id, role, name, email, phone) => {
   if (!process.env.JWT_SECRET) {
     throw new Error("JWT_SECRET is not defined in environment variables");
   }
-  return jwt.sign({ id, role, name, email }, process.env.JWT_SECRET, {
+  return jwt.sign({ id, role, name, email, phone }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
 };
@@ -138,6 +138,7 @@ exports.updateProfile = asyncHandler(async (req, res) => {
     phone: user.phone,
     role: user.role,
     currentRole: user.currentRole,
+    token: generateToken(user._id, user.role, user.name, user.email, user.phone),
     message: "Profile updated successfully",
   });
 });

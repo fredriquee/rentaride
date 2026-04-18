@@ -14,11 +14,25 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: false, // Allow cross-origin access to static files
 }));
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE"],
+
+// CORS Configuration - More flexible for development
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl requests, etc)
+    // Allow requests from localhost
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || process.env.CORS_ORIGIN === origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
-}));
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
