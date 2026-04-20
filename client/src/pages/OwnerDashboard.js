@@ -14,6 +14,7 @@ function OwnerDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState({});
   const [vehicles, setVehicles] = useState([]);
   const [stats, setStats] = useState({
     totalEarnings: 0,
@@ -37,6 +38,16 @@ function OwnerDashboard() {
 
   useEffect(() => {
     fetchOwnerDashboardData();
+    
+    // Refetch data when page becomes visible (e.g., returning from payment page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchOwnerDashboardData();
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   const fetchOwnerDashboardData = async () => {
@@ -136,6 +147,23 @@ function OwnerDashboard() {
         };
       });
       setVehicleStats(vehiclePerformance);
+
+      // Fetch payment details for all bookings
+      const paymentsMap = {};
+      for (const booking of allBookings) {
+        if (booking.paymentId) {
+          try {
+            const paymentRes = await axios.get(`http://localhost:5000/api/payments/booking/${booking._id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            paymentsMap[booking._id] = paymentRes.data.payment;
+            console.log(`✓ Payment fetched for owner booking ${booking._id}:`, paymentRes.data.payment.status);
+          } catch (err) {
+            console.error(`✗ Failed to fetch payment for owner booking ${booking._id}:`, err.response?.status, err.response?.data?.message);
+          }
+        }
+      }
+      setPayments(paymentsMap);
     } catch (error) {
       toast.error("Failed to load dashboard data");
       console.error(error);
@@ -156,8 +184,14 @@ function OwnerDashboard() {
         }
       );
 
-      toast.success(`Booking ${status} successfully!`);
-      fetchOwnerDashboardData();
+      // If cancelled, remove from list immediately
+      if (status === 'cancelled') {
+        setBookings(bookings.filter(b => b._id !== id));
+        toast.success("Booking cancelled successfully!");
+      } else {
+        toast.success(`Booking ${status} successfully!`);
+        fetchOwnerDashboardData();
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update status");
       console.error(error);
@@ -436,8 +470,8 @@ function OwnerDashboard() {
               </div>
             ) : (
               bookings
-                .slice()
-                .reverse()
+                .filter(b => b.status !== 'cancelled')
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .map(b => {
                   const days = Math.ceil(
                     (new Date(b.endDate) - new Date(b.startDate)) / (1000 * 60 * 60 * 24)
@@ -509,6 +543,17 @@ function OwnerDashboard() {
                             <p className="font-medium">Renter Email</p>
                             <p className="font-bold text-gray-900 dark:text-white">{b.user?.email}</p>
                           </div>
+                          {b.paymentId && (
+                            <div className="flex items-center gap-3">
+                              <CheckCircle size={20} className={(payments[b._id]?.status === "paid" || payments[b._id]?.status === "completed") ? "text-green-500" : "text-yellow-500"} />
+                              <div className="text-sm">
+                                <p className="text-gray-500 dark:text-gray-400 font-medium">Payment Status</p>
+                                <p className={`font-bold ${(payments[b._id]?.status === "paid" || payments[b._id]?.status === "completed") ? "text-green-600 dark:text-green-400" : "text-yellow-600 dark:text-yellow-400"}`}>
+                                  {(payments[b._id]?.status === "paid" || payments[b._id]?.status === "completed") ? "✓ Paid" : "Pending"}
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {b.status === "pending" && (

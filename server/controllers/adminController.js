@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Vehicle = require("../models/Vehicle");
 const Booking = require("../models/Booking");
+const Payment = require("../models/Payment");
 const asyncHandler = require("express-async-handler");
 
 // @desc    Get all users
@@ -124,7 +125,14 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
 exports.getAllBookings = asyncHandler(async (req, res) => {
   const bookings = await Booking.find({})
     .populate("user", "name email")
-    .populate("vehicle", "title pricePerDay");
+    .populate({
+      path: "vehicle",
+      select: "title pricePerDay owner",
+      populate: {
+        path: "owner",
+        select: "name email"
+      }
+    });
   res.json(bookings);
 });
 
@@ -142,3 +150,65 @@ exports.deleteBooking = asyncHandler(async (req, res) => {
     throw new Error("Booking not found");
   }
 });
+
+// @desc    Get all payments
+// @route   GET /api/admin/payments
+// @access  Private/Admin
+exports.getAllPayments = asyncHandler(async (req, res) => {
+  const payments = await Payment.find({})
+    .populate("user", "name email")
+    .populate("booking", "startDate endDate status")
+    .sort({ createdAt: -1 });
+  res.json(payments);
+});
+
+// @desc    Update payment status (for refunds, etc)
+// @route   PUT /api/admin/payments/:id
+// @access  Private/Admin
+exports.updatePaymentStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
+
+  const payment = await Payment.findById(req.params.id);
+
+  if (!payment) {
+    res.status(404);
+    throw new Error("Payment not found");
+  }
+
+  payment.status = status;
+  await payment.save();
+
+  res.json(payment);
+});
+
+// @desc    Get dashboard statistics
+// @route   GET /api/admin/statistics
+// @access  Private/Admin
+exports.getStatistics = asyncHandler(async (req, res) => {
+  const totalUsers = await User.countDocuments();
+  const totalVehicles = await Vehicle.countDocuments();
+  const totalBookings = await Booking.countDocuments();
+  
+  const completedPayments = await Payment.find({ status: "completed" });
+  const totalRevenue = completedPayments.reduce((sum, p) => sum + p.amount, 0);
+
+  const pendingBookings = await Booking.countDocuments({ status: "pending" });
+  const confirmedBookings = await Booking.countDocuments({ status: "confirmed" });
+  const cancelledBookings = await Booking.countDocuments({ status: "cancelled" });
+
+  res.json({
+    totalUsers,
+    totalVehicles,
+    totalBookings,
+    totalRevenue,
+    pendingBookings,
+    confirmedBookings,
+    cancelledBookings,
+    bookingStats: {
+      pending: pendingBookings,
+      confirmed: confirmedBookings,
+      cancelled: cancelledBookings
+    }
+  });
+});
+

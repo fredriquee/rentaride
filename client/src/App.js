@@ -22,6 +22,7 @@ import ThemeToggle from "./components/ThemeToggle";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ProfileDropdown from "./components/ProfileDropdown";
+import Footer from "./components/Footer";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -255,6 +256,7 @@ function App() {
                   <Route path="/settings" element={<ProtectedRoute component={Settings} />} />
                 </Routes>
               </main>
+              <Footer />
             </div>
           </Router>
         </ErrorBoundary>

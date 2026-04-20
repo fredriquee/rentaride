@@ -27,6 +27,16 @@ function UserDashboard() {
 
   useEffect(() => {
     fetchUserDashboardData();
+    
+    // Refetch data when page becomes visible (e.g., returning from payment page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchUserDashboardData();
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
   const fetchUserDashboardData = async () => {
@@ -350,8 +360,8 @@ function UserDashboard() {
           ) : (
             <div className="space-y-4">
               {bookings
-                .slice()
-                .reverse()
+                .filter(b => b.status !== 'cancelled')
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                 .map(booking => {
                   const days = Math.ceil(
                     (new Date(booking.endDate) - new Date(booking.startDate)) / (1000 * 60 * 60 * 24)

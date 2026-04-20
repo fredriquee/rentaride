@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { MapPin, Tag, Car, Fuel, Phone, Mail } from "lucide-react";
+import { MapPin, Tag, Car, Fuel, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import VehicleFilter from "../components/VehicleFilter";
@@ -10,6 +10,8 @@ function VehicleList() {
   const [vehicles, setVehicles] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
   const [filters, setFilters] = useState({
     location: "",
     type: "",
@@ -39,6 +41,7 @@ function VehicleList() {
 
   const applyFilters = (newFilters) => {
     setFilters(newFilters);
+    setCurrentPage(1);
     const filtered = vehicles.filter((vehicle) => {
       const locationMatch =
         !newFilters.location ||
@@ -68,6 +71,7 @@ function VehicleList() {
       minPrice: "",
       maxPrice: "",
     });
+    setCurrentPage(1);
     setFilteredVehicles(vehicles);
   };
 
@@ -84,6 +88,25 @@ function VehicleList() {
     }
 
     navigate(`/book/${vehicle._id}`);
+  };
+
+  const totalPages = Math.ceil(filteredVehicles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedVehicles = filteredVehicles.slice(startIndex, endIndex);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   if (loading) {
@@ -107,7 +130,7 @@ function VehicleList() {
 
       {/* Vehicles Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-        {filteredVehicles.map((v) => (
+        {paginatedVehicles.map((v) => (
           <div key={v._id} className="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-md transition group">
             <div className="h-48 sm:h-60 md:h-72 bg-gray-200 relative overflow-hidden">
               {v.image ? (
@@ -222,6 +245,66 @@ function VehicleList() {
           <Car size={48} className="mx-auto text-gray-300 mb-4" />
           <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100">No vehicles found</h3>
           <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters to find more vehicles.</p>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {filteredVehicles.length > 0 && totalPages > 1 && (
+        <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Showing <span className="font-bold text-gray-900 dark:text-gray-100">{startIndex + 1}</span> to <span className="font-bold text-gray-900 dark:text-gray-100">{Math.min(endIndex, filteredVehicles.length)}</span> of <span className="font-bold text-gray-900 dark:text-gray-100">{filteredVehicles.length}</span> vehicles
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1}
+              className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg font-medium transition ${
+                currentPage === 1
+                  ? "bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95"
+              }`}
+            >
+              <ChevronLeft size={16} />
+              <span className="hidden sm:inline">Previous</span>
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    window.scrollTo(0, 0);
+                  }}
+                  className={`w-10 h-10 rounded-lg font-bold transition ${
+                    currentPage === page
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`flex items-center gap-1 px-3 sm:px-4 py-2 rounded-lg font-medium transition ${
+                currentPage === totalPages
+                  ? "bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95"
+              }`}
+            >
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Page <span className="font-bold text-gray-900 dark:text-gray-100">{currentPage}</span> of <span className="font-bold text-gray-900 dark:text-gray-100">{totalPages}</span>
+          </div>
         </div>
       )}
     </div>

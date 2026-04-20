@@ -32,6 +32,43 @@ function PaymentPage() {
         if (paymentData.payment?.gateway) {
           setSelectedGateway(paymentData.payment.gateway);
         }
+
+        // Check if pidx is in localStorage (returning from Khalti payment)
+        const savedPidx = localStorage.getItem(`khalti_pidx_${bookingId}`);
+        const savedAmount = localStorage.getItem(`khalti_amount_${bookingId}`);
+        
+        if (savedPidx && paymentData.payment?.status !== "paid" && paymentData.payment?.status !== "completed") {
+          // Restore pidx from localStorage
+          setPaymentDetails({
+            pidx: savedPidx,
+            payment_url: null,
+            amount: savedAmount ? parseInt(savedAmount) : 0,
+            gateway: "khalti"
+          });
+          
+          // Auto-verify the payment
+          try {
+            const verifyResponse = await paymentService.verifyPayment(savedPidx, bookingId);
+            
+            if (verifyResponse.payment.status === "paid" || verifyResponse.payment.status === "completed") {
+              setPayment(verifyResponse.payment);
+              toast.success("Payment verified successfully!");
+              // Clear localStorage
+              localStorage.removeItem(`khalti_pidx_${bookingId}`);
+              localStorage.removeItem(`khalti_amount_${bookingId}`);
+              
+              // Redirect to MyBookings after 2 seconds
+              setTimeout(() => {
+                navigate("/my-bookings");
+              }, 2000);
+            } else if (verifyResponse.payment.status === "pending") {
+              toast.loading("Payment is being processed...");
+            }
+          } catch (verifyErr) {
+            console.error("Auto-verify error:", verifyErr);
+          }
+        }
+
         setLoading(false);
       } catch (err) {
         // Payment might not exist yet, that's ok
@@ -50,6 +87,10 @@ function PaymentPage() {
       const response = await paymentService.initiatePayment(bookingId);
       
       if (response.success) {
+        // Store pidx in localStorage before redirecting
+        localStorage.setItem(`khalti_pidx_${bookingId}`, response.pidx);
+        localStorage.setItem(`khalti_amount_${bookingId}`, response.payment.amount);
+        
         setPaymentDetails({
           pidx: response.pidx,
           payment_url: response.payment_url,
@@ -133,9 +174,18 @@ function PaymentPage() {
     try {
       const response = await paymentService.verifyPayment(paymentDetails.pidx, bookingId);
       
-      if (response.payment.status === "completed") {
+      if (response.payment.status === "paid" || response.payment.status === "completed") {
         setPayment(response.payment);
         toast.success("Payment verified successfully!");
+        
+        // Clear localStorage
+        localStorage.removeItem(`khalti_pidx_${bookingId}`);
+        localStorage.removeItem(`khalti_amount_${bookingId}`);
+        
+        // Redirect to MyBookings after 2 seconds
+        setTimeout(() => {
+          navigate("/my-bookings");
+        }, 2000);
       } else if (response.payment.status === "pending") {
         setError("Payment is pending. Please wait for confirmation.");
         toast.loading("Verifying payment...");
@@ -166,6 +216,11 @@ function PaymentPage() {
       await paymentService.cancelPayment(payment._id);
       setPayment(null);
       setPaymentDetails({ pidx: null, payment_url: null, amount: 0, gateway: null });
+      
+      // Clear localStorage
+      localStorage.removeItem(`khalti_pidx_${bookingId}`);
+      localStorage.removeItem(`khalti_amount_${bookingId}`);
+      
       toast.success("Payment cancelled successfully");
     } catch (err) {
       console.error("Cancel payment error:", err);
@@ -206,14 +261,14 @@ function PaymentPage() {
           {/* Payment Status */}
           {payment && (
             <div className={`p-6 rounded-2xl border-2 ${
-              payment.status === "completed"
+              (payment.status === "paid" || payment.status === "completed")
                 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
                 : payment.status === "pending"
                 ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
                 : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
             }`}>
               <div className="flex items-start gap-3">
-                {payment.status === "completed" && (
+                {(payment.status === "paid" || payment.status === "completed") && (
                   <>
                     <CheckCircle className="text-green-600 dark:text-green-400 mt-1 shrink-0" size={24} />
                     <div>
@@ -238,7 +293,7 @@ function PaymentPage() {
                     </div>
                   </>
                 )}
-                {payment.status !== "completed" && payment.status !== "pending" && (
+                {payment.status !== "paid" && payment.status !== "pending" && (
                   <>
                     <AlertCircle className="text-red-600 dark:text-red-400 mt-1 shrink-0" size={24} />
                     <div>
@@ -267,7 +322,7 @@ function PaymentPage() {
           </div>
 
           {/* Gateway Selection */}
-          {!payment || payment.status !== "completed" ? (
+          {!payment || payment.status !== "paid" ? (
             <div className="space-y-4">
               <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                 Choose Payment Gateway
@@ -321,7 +376,7 @@ function PaymentPage() {
           ) : null}
 
           {/* Gateway Info */}
-          {selectedGateway === "khalti" && (!payment || payment.status !== "completed") && (
+          {selectedGateway === "khalti" && (!payment || payment.status !== "paid") && (
             <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
               <h3 className="font-bold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
                 <CreditCard size={20} />
@@ -336,7 +391,7 @@ function PaymentPage() {
             </div>
           )}
 
-          {selectedGateway === "esewa" && (!payment || payment.status !== "completed") && (
+          {selectedGateway === "esewa" && (!payment || payment.status !== "paid") && (
             <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-2xl border border-green-200 dark:border-green-800">
               <h3 className="font-bold text-green-900 dark:text-green-200 mb-4 flex items-center gap-2">
                 <CreditCard size={20} />
@@ -360,7 +415,7 @@ function PaymentPage() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            {payment?.status === "completed" ? (
+            {(payment?.status === "paid" || payment?.status === "completed") ? (
               <>
                 <button
                   onClick={() => navigate("/my-bookings")}

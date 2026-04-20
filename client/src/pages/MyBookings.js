@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard, Phone, User, Mail } from "lucide-react";
+import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard, Phone, User, Mail, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
+  const [payments, setPayments] = useState({});
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("running");
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [cancellationReason, setCancellationReason] = useState("");
@@ -20,7 +22,36 @@ function MyBookings() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setBookings(res.data);
+      
+      // Filter out cancelled bookings and sort by latest first
+      const activeBookings = res.data
+        .filter(booking => booking.status !== "cancelled")
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      setBookings(activeBookings);
+      
+      // Fetch payment details for all bookings
+      const paymentsMap = {};
+      for (const booking of activeBookings) {
+        if (booking.paymentId) {
+          try {
+            const paymentRes = await axios.get(`http://localhost:5000/api/payments/booking/${booking._id}`, {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            });
+            paymentsMap[booking._id] = paymentRes.data.payment;
+            console.log(`✓ Payment fetched for booking ${booking._id}:`, paymentRes.data.payment.status);
+          } catch (err) {
+            console.error(`✗ Failed to fetch payment for booking ${booking._id}:`, err.response?.status, err.response?.data?.message);
+            // If 404, it means payment was not found in database
+            if (err.response?.status === 404) {
+              console.error(`Payment record not found for booking with paymentId: ${booking.paymentId}`);
+            }
+          }
+        }
+      }
+      setPayments(paymentsMap);
     } catch (error) {
       toast.error("Failed to fetch bookings");
       console.error(error);
@@ -40,7 +71,25 @@ function MyBookings() {
 
   useEffect(() => {
     fetchBookings();
+    
+    // Refetch data when page becomes visible (e.g., returning from payment page)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchBookings();
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
+
+  const runningBookings = bookings.filter(b => 
+    b.status === "pending" || b.status === "confirmed" || b.status === "cancellation_requested"
+  );
+
+  const completedBookings = bookings.filter(b => b.status === "completed");
+
+  const displayedBookings = activeTab === "running" ? runningBookings : completedBookings;
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -85,10 +134,13 @@ function MyBookings() {
           },
         }
       );
-      toast.success("Cancellation request sent to owner!");
+      toast.success("Booking cancelled successfully!");
+      
+      // Remove the cancelled booking from the list immediately
+      setBookings(bookings.filter(booking => booking._id !== selectedBookingId));
+      
       setShowCancelModal(false);
       setCancellationReason("");
-      fetchBookings();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to send cancellation request");
     } finally {
@@ -113,15 +165,46 @@ function MyBookings() {
         </span>
       </div>
 
-      {bookings.length === 0 ? (
+      {/* Tabs */}
+      <div className="flex gap-2 sm:gap-4 border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("running")}
+          className={`px-4 sm:px-6 py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
+            activeTab === "running"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+          }`}
+        >
+          Running ({runningBookings.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("completed")}
+          className={`px-4 sm:px-6 py-3 font-medium text-sm sm:text-base whitespace-nowrap border-b-2 transition ${
+            activeTab === "completed"
+              ? "border-blue-600 text-blue-600 dark:text-blue-400"
+              : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+          }`}
+        >
+          Completed ({completedBookings.length})
+        </button>
+      </div>
+
+      {displayedBookings.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 border-dashed">
           <CalendarDays size={48} className="mx-auto text-gray-300 mb-4" />
-          <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100">No bookings yet</h3>
-          <p className="text-gray-500 dark:text-gray-400">You haven't booked any vehicles yet. Start exploring!</p>
+          <h3 className="text-xl font-medium text-gray-900 dark:text-gray-100">
+            {activeTab === "running" ? "No active bookings" : "No completed bookings"}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400">
+            {activeTab === "running" 
+              ? "You don't have any running bookings right now."
+              : "You haven't completed any bookings yet."
+            }
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
-          {bookings.map((booking) => (
+          {displayedBookings.map((booking) => (
             <div key={booking._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
               <div className="md:w-1/3 h-48 md:h-auto bg-gray-100 dark:bg-gray-800 relative">
                 {booking.vehicle?.image ? (
@@ -230,12 +313,17 @@ function MyBookings() {
                       </button>
                     )}
 
-                    {booking.paymentId && (
+                    {(payments[booking._id]?.status === "paid" || payments[booking._id]?.status === "completed") ? (
                       <span className="text-green-600 dark:text-green-400 text-sm font-bold flex items-center gap-1">
                         <CheckCircle2 size={16} />
                         Paid
                       </span>
-                    )}
+                    ) : booking.paymentId ? (
+                      <span className="text-yellow-600 dark:text-yellow-400 text-sm font-bold flex items-center gap-1">
+                        <AlertCircle size={16} />
+                        Payment Pending
+                      </span>
+                    ) : null}
                     
                     {(booking.status === "pending" || booking.status === "confirmed") && (
                       <button

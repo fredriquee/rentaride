@@ -10,11 +10,17 @@ const {
   getAllBookings,
   deleteBooking,
   updateBooking,
+  getAllPayments,
+  updatePaymentStatus,
+  getStatistics,
 } = require("../controllers/adminController");
 const { authMiddleware, adminMiddleware } = require("../middleware/authMiddleware");
 
 // Apply middleware to all routes in this file
 router.use(authMiddleware, adminMiddleware);
+
+// Statistics route
+router.route("/statistics").get(getStatistics);
 
 // User routes
 router.route("/users").get(getAllUsers);
@@ -33,5 +39,9 @@ router.route("/bookings").get(getAllBookings);
 router.route("/bookings/:id")
   .delete(deleteBooking)
   .put(updateBooking); // For updating booking details/status
+
+// Payment routes
+router.route("/payments").get(getAllPayments);
+router.route("/payments/:id").put(updatePaymentStatus);
 
 module.exports = router;

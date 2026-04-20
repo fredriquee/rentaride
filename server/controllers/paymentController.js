@@ -61,7 +61,7 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
   // Check if payment already exists and is pending/completed
   const existingPayment = await Payment.findOne({
     booking: bookingId,
-    status: { $in: ["completed", "pending"] }
+    status: { $in: ["completed", "pending", "paid"] }
   });
 
   if (existingPayment && existingPayment.status === "completed") {
@@ -107,7 +107,7 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
 
   // Create Khalti payment payload
   const khaltiPayload = {
-    return_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment-success`,
+    return_url: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/${bookingId}`,
     website_url: process.env.FRONTEND_URL || "http://localhost:3000",
     amount: amountInPaisa,
     purchase_order_id: purchaseOrderId,
@@ -168,8 +168,7 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
     });
 
     // Update booking to link with payment
-    booking.paymentId = payment._id;
-    await booking.save();
+    await Booking.findByIdAndUpdate(bookingId, { paymentId: payment._id }, { new: true });
 
     res.status(200).json({
       success: true,
@@ -238,24 +237,15 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
 
     const { status, transaction_id, total_amount, fee, refunded } = khaltiResponse.data;
 
-    // Update payment record based on Khalti response
-    payment.status = status === "Completed" ? "completed" : 
-                     status === "Pending" ? "pending" :
-                     status === "User canceled" ? "cancelled" : "failed";
+    // Update payment status - set to 'paid' if transaction is completed
+    if (status === "Completed") {
+      payment.status = "paid";
+      payment.paymentCompletedAt = new Date();
+    }
     
     if (transaction_id) {
       payment.transaction_id = transaction_id;
       payment.tidx = transaction_id;
-    }
-    
-    if (status === "Completed") {
-      payment.paymentCompletedAt = new Date();
-      // Update booking status
-      const booking = await Booking.findById(payment.booking);
-      if (booking && booking.status === "pending") {
-        booking.status = "confirmed";
-        await booking.save();
-      }
     }
 
     await payment.save();
@@ -319,24 +309,15 @@ exports.handlePaymentCallback = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    // Update payment status
-    payment.status = khaltiStatus === "Completed" ? "completed" :
-                     khaltiStatus === "Pending" ? "pending" :
-                     khaltiStatus === "User canceled" ? "cancelled" : "failed";
+    // Update payment status - set to 'paid' if transaction is completed
+    if (khaltiStatus === "Completed") {
+      payment.status = "paid";
+      payment.paymentCompletedAt = new Date();
+    }
     
     if (khaltiTransactionId) {
       payment.transaction_id = khaltiTransactionId;
       payment.tidx = khaltiTransactionId;
-    }
-    
-    if (khaltiStatus === "Completed") {
-      payment.paymentCompletedAt = new Date();
-      // Update booking status
-      const booking = await Booking.findById(payment.booking);
-      if (booking && booking.status === "pending") {
-        booking.status = "confirmed";
-        await booking.save();
-      }
     }
 
     await payment.save();
@@ -371,17 +352,27 @@ exports.getPaymentByBooking = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Only fetch active payments (not cancelled or failed)
+  // Populate booking with vehicle to check ownership
   const payment = await Payment.findOne({ 
     booking: bookingId,
-    status: { $in: ["initiated", "pending", "completed"] }
+    status: { $in: ["initiated", "pending", "completed", "paid"] }
+  }).populate({
+    path: "booking",
+    populate: {
+      path: "vehicle",
+      select: "owner"
+    }
   });
   
   if (!payment) {
     return res.status(404).json({ message: "Payment not found" });
   }
 
-  // Verify ownership
-  if (payment.user.toString() !== userId.toString()) {
+  // Verify ownership - allow if user is the renter OR the vehicle owner
+  const isRenter = payment.user.toString() === userId.toString();
+  const isOwner = payment.booking.vehicle.owner?.toString() === userId.toString();
+
+  if (!isRenter && !isOwner) {
     return res.status(403).json({ message: "Unauthorized" });
   }
 
@@ -431,7 +422,7 @@ exports.cancelPayment = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: "Unauthorized" });
   }
 
-  if (payment.status === "completed") {
+  if (payment.status === "completed" || payment.status === "paid") {
     return res.status(400).json({ message: "Cannot cancel a completed payment" });
   }
 
@@ -466,7 +457,7 @@ exports.initiateESewaPayment = asyncHandler(async (req, res) => {
   const existingPayment = await Payment.findOne({
     booking: bookingId,
     gateway: "esewa",
-    status: { $in: ["completed", "pending"] }
+    status: { $in: ["completed", "pending", "paid"] }
   });
 
   if (existingPayment && existingPayment.status === "completed") {
@@ -516,8 +507,7 @@ exports.initiateESewaPayment = asyncHandler(async (req, res) => {
   });
 
   // Update booking to link with payment
-  booking.paymentId = payment._id;
-  await booking.save();
+  await Booking.findByIdAndUpdate(bookingId, { paymentId: payment._id }, { new: true });
 
   // Build eSewa payment form data
   const esewaPaymentData = {
@@ -528,8 +518,8 @@ exports.initiateESewaPayment = asyncHandler(async (req, res) => {
     tAmt: totalAmount,
     pid: purchaseOrderId,
     scd: ESEWA_MERCHANT_ID,
-    su: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment-success?gateway=esewa`,
-    fu: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment-failed?gateway=esewa`
+    su: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/${bookingId}`,
+    fu: `${process.env.FRONTEND_URL || "http://localhost:3000"}/payment/${bookingId}`
   };
 
   // Generate signature
@@ -591,23 +581,11 @@ exports.verifyESewaPayment = asyncHandler(async (req, res) => {
       }
     );
 
-    // Update payment based on response
+    // Update payment based on response - set to 'paid' if transaction is completed
     if (esewaResponse.data.status === "COMPLETE") {
-      payment.status = "completed";
+      payment.status = "paid";
       payment.transaction_id = refId;
       payment.paymentCompletedAt = new Date();
-
-      // Update booking status
-      const booking = await Booking.findById(payment.booking);
-      if (booking && booking.status === "pending") {
-        booking.status = "confirmed";
-        await booking.save();
-      }
-    } else if (esewaResponse.data.status === "PENDING") {
-      payment.status = "pending";
-    } else {
-      payment.status = "failed";
-      payment.errorMessage = esewaResponse.data.status;
     }
 
     await payment.save();
@@ -656,17 +634,10 @@ exports.handleESewaCallback = asyncHandler(async (req, res) => {
       return res.status(404).json({ message: "Payment not found" });
     }
 
-    // Update payment
-    payment.status = "completed";
+    // Update payment - set to 'paid' when transaction is complete
+    payment.status = "paid";
     payment.transaction_id = refId;
     payment.paymentCompletedAt = new Date();
-
-    // Update booking
-    const booking = await Booking.findById(payment.booking);
-    if (booking && booking.status === "pending") {
-      booking.status = "confirmed";
-      await booking.save();
-    }
 
     await payment.save();
 
