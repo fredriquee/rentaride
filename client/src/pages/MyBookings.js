@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard } from "lucide-react";
+import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard, Phone, User, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function MyBookings() {
@@ -125,7 +125,7 @@ function MyBookings() {
             <div key={booking._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
               <div className="md:w-1/3 h-48 md:h-auto bg-gray-100 dark:bg-gray-800 relative">
                 {booking.vehicle?.image ? (
-                  <img src={booking.vehicle.image} alt={booking.vehicle.title} className="w-full h-full object-cover" />
+                  <img src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `http://localhost:5000${booking.vehicle.image}`} alt={booking.vehicle.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <Car size={48} />
@@ -175,6 +175,36 @@ function MyBookings() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Owner Contact Information */}
+                  {booking.vehicle?.owner && (
+                    <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        <User size={16} className="text-blue-500" />
+                        Vehicle Owner Contact
+                      </h4>
+                      <div className="space-y-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <User size={14} className="text-gray-500" />
+                          <span className="text-sm text-gray-900 dark:text-gray-200 font-medium">{booking.vehicle.owner.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail size={14} className="text-gray-500" />
+                          <a href={`mailto:${booking.vehicle.owner.email}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                            {booking.vehicle.owner.email}
+                          </a>
+                        </div>
+                        {booking.vehicle.owner.phone && (
+                          <div className="flex items-center gap-2">
+                            <Phone size={14} className="text-gray-500" />
+                            <a href={`tel:${booking.vehicle.owner.phone}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                              {booking.vehicle.owner.phone}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4">
@@ -233,7 +263,7 @@ function MyBookings() {
             <div className="relative mb-6">
               <MessageSquareText className="absolute left-3 top-3 text-gray-400" size={18} />
               <textarea
-                className="w-full pl-10 pr-4 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 rows="4"
                 placeholder="e.g., Change of plans, vehicle no longer needed..."
                 value={cancellationReason}
@@ -244,7 +274,7 @@ function MyBookings() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowCancelModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 transition"
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                 disabled={submittingCancellation}
               >
                 Cancel

@@ -134,6 +134,82 @@ const paymentService = {
     const sandbox_url = `https://test-pay.khalti.com/?pidx=${pidx}`;
     const production_url = `https://pay.khalti.com/?pidx=${pidx}`;
     return isSandbox ? sandbox_url : production_url;
+  },
+
+  // ========== eSewa Payment Methods ==========
+
+  /**
+   * Initiate a payment with eSewa for a booking
+   * @param bookingId - The ID of the booking to pay for
+   * @returns Promise with payment data and eSewa URL
+   */
+  initiateESewaPayment: async (bookingId) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/payments/esewa/initiate`,
+        { bookingId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("eSewa payment initiation error:", error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Verify eSewa payment status
+   * @param oid - Order ID (purchase_order_id)
+   * @param refId - Reference ID (transaction_uuid) from eSewa
+   * @returns Promise with payment verification details
+   */
+  verifyESewaPayment: async (oid, refId) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/payments/esewa/verify`,
+        { oid, refId },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("eSewa payment verification error:", error);
+      throw error.response?.data || error.message;
+    }
+  },
+
+  /**
+   * Build eSewa payment form
+   * @param paymentData - Payment data from initiate response
+   * @returns Form HTML string ready to submit
+   */
+  buildESewaForm: (paymentData) => {
+    const { amt, psc, pdc, txAmt, tAmt, pid, scd, su, fu, signature } = paymentData;
+    
+    const form = `
+      <form id="esewaForm" method="POST" action="https://uat.esewa.com.np/epay/main">
+        <input type="hidden" id="amt" name="amt" value="${amt}">
+        <input type="hidden" id="psc" name="psc" value="${psc}">
+        <input type="hidden" id="pdc" name="pdc" value="${pdc}">
+        <input type="hidden" id="txAmt" name="txAmt" value="${txAmt}">
+        <input type="hidden" id="tAmt" name="tAmt" value="${tAmt}">
+        <input type="hidden" id="pid" name="pid" value="${pid}">
+        <input type="hidden" id="scd" name="scd" value="${scd}">
+        <input type="hidden" id="su" name="su" value="${su}">
+        <input type="hidden" id="fu" name="fu" value="${fu}">
+        <input type="hidden" id="signature" name="signature" value="${signature}">
+      </form>
+    `;
+    return form;
   }
 };
 

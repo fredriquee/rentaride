@@ -7,7 +7,7 @@ const path = require("path");
 // @route   POST /api/vehicles
 // @access  Private/Owner
 exports.addVehicle = asyncHandler(async (req, res) => {
-  const { title, type, pricePerDay, location, image } = req.body;
+  const { title, type, pricePerDay, location, image, fuelType } = req.body;
 
   console.log("Request body:", req.body);
   console.log("Request files:", req.files);
@@ -31,11 +31,25 @@ exports.addVehicle = asyncHandler(async (req, res) => {
 
   console.log("Processed images array:", images);
 
+  // Handle location - can be string or JSON stringified object
+  let locationValue = null;
+  if (location) {
+    try {
+      // Try to parse if it's a JSON string
+      const parsed = JSON.parse(location);
+      locationValue = parsed.address || parsed;
+    } catch (e) {
+      // If not JSON, use as-is
+      locationValue = location;
+    }
+  }
+
   const vehicle = await Vehicle.create({
     title,
     type,
     pricePerDay: parseFloat(pricePerDay),
-    location: location || null,
+    location: locationValue,
+    fuelType: fuelType || "petrol",
     image: image || (images.length > 0 ? images[0] : null),
     images: images.length > 0 ? images : [],
     owner: req.user._id,
@@ -87,7 +101,7 @@ exports.getVehiclesByUserId = asyncHandler(async (req, res) => {
 // @route   PUT /api/vehicles/:id
 // @access  Private/Owner
 exports.updateVehicle = asyncHandler(async (req, res) => {
-  const { title, type, pricePerDay, location, status } = req.body;
+  const { title, type, pricePerDay, location, status, fuelType } = req.body;
   const vehicle = await Vehicle.findById(req.params.id);
 
   if (!vehicle) {
@@ -105,8 +119,21 @@ exports.updateVehicle = asyncHandler(async (req, res) => {
   if (title) vehicle.title = title;
   if (type) vehicle.type = type;
   if (pricePerDay) vehicle.pricePerDay = parseFloat(pricePerDay);
-  if (location) vehicle.location = location;
+  
+  // Handle location - can be string or JSON stringified object
+  if (location) {
+    try {
+      // Try to parse if it's a JSON string
+      const parsed = JSON.parse(location);
+      vehicle.location = parsed.address || parsed;
+    } catch (e) {
+      // If not JSON, use as-is
+      vehicle.location = location;
+    }
+  }
+  
   if (status) vehicle.status = status;
+  if (fuelType) vehicle.fuelType = fuelType;
 
   // Handle new image uploads (replace old one)
   if (req.files && req.files.length > 0) {

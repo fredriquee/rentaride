@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, Phone, User } from "lucide-react";
+import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, Phone, User, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 function BookingPage() {
@@ -159,6 +159,12 @@ function BookingPage() {
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-blue-900 dark:text-blue-200 uppercase tracking-wider mb-2">Owner Contact</p>
                     <p className="text-sm text-blue-800 dark:text-blue-300 font-semibold">{vehicle.owner.name}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Mail size={14} className="text-blue-600 dark:text-blue-400" />
+                      <a href={`mailto:${vehicle.owner.email}`} className="text-sm text-blue-700 dark:text-blue-300 hover:underline font-medium">
+                        {vehicle.owner.email}
+                      </a>
+                    </div>
                     {vehicle.owner.phone && (
                       <div className="flex items-center gap-2 mt-2">
                         <Phone size={14} className="text-blue-600 dark:text-blue-400" />

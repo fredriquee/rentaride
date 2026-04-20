@@ -50,6 +50,7 @@ function ManageVehicles() {
     setEditForm({
       title: vehicle.title,
       type: vehicle.type,
+      fuelType: vehicle.fuelType || "petrol",
       pricePerDay: vehicle.pricePerDay,
       location: locationAddress,
       status: vehicle.status,
@@ -102,6 +103,7 @@ function ManageVehicles() {
       const formData = new FormData();
       formData.append("title", editForm.title);
       formData.append("type", editForm.type);
+      formData.append("fuelType", editForm.fuelType);
       formData.append("pricePerDay", editForm.pricePerDay);
       formData.append("location", editLocation || editForm.location);
       formData.append("status", editForm.status);
@@ -232,7 +234,7 @@ function ManageVehicles() {
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
                       />
                     </div>
 
@@ -243,11 +245,26 @@ function ManageVehicles() {
                       <select
                         value={editForm.type}
                         onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
-                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition appearance-none"
                       >
                         <option value="Scooter">Scooter</option>
                         <option value="Bike">Bike</option>
                         <option value="Car">Car</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Fuel Type
+                      </label>
+                      <select
+                        value={editForm.fuelType}
+                        onChange={(e) => setEditForm({ ...editForm, fuelType: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition appearance-none"
+                      >
+                        <option value="electric">Electric</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
                       </select>
                     </div>
 
@@ -259,7 +276,7 @@ function ManageVehicles() {
                         type="number"
                         value={editForm.pricePerDay}
                         onChange={(e) => setEditForm({ ...editForm, pricePerDay: e.target.value })}
-                        className="w-full px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
                       />
                     </div>
 
@@ -276,7 +293,7 @@ function ManageVehicles() {
                           value={editLocation}
                           onChange={(e) => setEditLocation(e.target.value)}
                           placeholder="e.g. Kathmandu, Nepal"
-                          className="w-full pl-10 px-3 py-2 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700"
+                          className="w-full pl-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition"
                         />
                       </div>
                     </div>
@@ -476,6 +493,12 @@ function ManageVehicles() {
                           <p className="text-gray-500 dark:text-gray-400">Status</p>
                           <p className="font-semibold capitalize text-gray-900 dark:text-gray-100">
                             {vehicle.status}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 dark:text-gray-400">Fuel Type</p>
+                          <p className="font-semibold capitalize text-gray-900 dark:text-gray-100">
+                            {vehicle.fuelType || "N/A"}
                           </p>
                         </div>
                       </div>

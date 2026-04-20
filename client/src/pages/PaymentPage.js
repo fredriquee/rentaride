@@ -15,10 +15,12 @@ function PaymentPage() {
   const [payment, setPayment] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedGateway, setSelectedGateway] = useState("khalti");
   const [paymentDetails, setPaymentDetails] = useState({
     pidx: null,
     payment_url: null,
-    amount: 0
+    amount: 0,
+    gateway: null
   });
 
   useEffect(() => {
@@ -27,6 +29,9 @@ function PaymentPage() {
         // Get payment info via booking
         const paymentData = await paymentService.getPaymentByBooking(bookingId);
         setPayment(paymentData.payment);
+        if (paymentData.payment?.gateway) {
+          setSelectedGateway(paymentData.payment.gateway);
+        }
         setLoading(false);
       } catch (err) {
         // Payment might not exist yet, that's ok
@@ -37,7 +42,7 @@ function PaymentPage() {
     checkPaymentStatus();
   }, [bookingId]);
 
-  const handleInitiatePayment = async () => {
+  const handleInitiateKhaltiPayment = async () => {
     setProcessing(true);
     setError(null);
     
@@ -48,7 +53,8 @@ function PaymentPage() {
         setPaymentDetails({
           pidx: response.pidx,
           payment_url: response.payment_url,
-          amount: response.payment.amount
+          amount: response.payment.amount,
+          gateway: "khalti"
         });
         
         toast.success("Payment initiated successfully!");
@@ -59,7 +65,55 @@ function PaymentPage() {
         }, 1500);
       }
     } catch (err) {
-      console.error("Payment initiation error:", err);
+      console.error("Khalti payment initiation error:", err);
+      
+      // Handle "Payment already initiated" error
+      if (err.message === "Payment already initiated" && err.payment_url) {
+        setError("You have a pending payment. Click 'Continue Payment' to complete it, or 'Cancel' to start a new one.");
+        setPaymentDetails({
+          pidx: err.pidx,
+          payment_url: err.payment_url,
+          amount: paymentDetails.amount,
+          gateway: "khalti"
+        });
+        toast.loading("Payment already initiated - continue to complete it");
+      } else {
+        setError(err.message || "Failed to initiate payment");
+        toast.error(err.message || "Failed to initiate payment");
+      }
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleInitiateESewaPayment = async () => {
+    setProcessing(true);
+    setError(null);
+    
+    try {
+      const response = await paymentService.initiateESewaPayment(bookingId);
+      
+      if (response.success) {
+        setPaymentDetails({
+          amount: response.paymentData.amt,
+          gateway: "esewa"
+        });
+        
+        toast.success("Redirecting to eSewa...");
+        
+        // Create and submit eSewa form
+        const formHtml = paymentService.buildESewaForm(response.paymentData);
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = formHtml;
+        document.body.appendChild(tempDiv);
+        
+        setTimeout(() => {
+          document.getElementById("esewaForm").submit();
+          document.body.removeChild(tempDiv);
+        }, 500);
+      }
+    } catch (err) {
+      console.error("eSewa payment initiation error:", err);
       setError(err.message || "Failed to initiate payment");
       toast.error(err.message || "Failed to initiate payment");
     } finally {
@@ -111,7 +165,7 @@ function PaymentPage() {
     try {
       await paymentService.cancelPayment(payment._id);
       setPayment(null);
-      setPaymentDetails({ pidx: null, payment_url: null, amount: 0 });
+      setPaymentDetails({ pidx: null, payment_url: null, amount: 0, gateway: null });
       toast.success("Payment cancelled successfully");
     } catch (err) {
       console.error("Cancel payment error:", err);
@@ -143,7 +197,7 @@ function PaymentPage() {
             <CreditCard size={32} />
             <h1 className="text-3xl font-bold">Payment</h1>
           </div>
-          <p className="text-blue-100">Complete your booking payment securely with Khalti</p>
+          <p className="text-blue-100">Complete your booking payment securely</p>
         </div>
 
         {/* Content */}
@@ -165,7 +219,7 @@ function PaymentPage() {
                     <div>
                       <h3 className="font-bold text-green-900 dark:text-green-200">Payment Successful</h3>
                       <p className="text-sm text-green-800 dark:text-green-300 mt-1">
-                        Your payment has been processed successfully.
+                        Your payment has been processed successfully via {payment.gateway?.toUpperCase()}.
                       </p>
                       <p className="text-sm text-green-800 dark:text-green-300 mt-2">
                         Transaction ID: <span className="font-mono bg-green-100 dark:bg-green-900 px-2 py-1 rounded">{payment.transaction_id}</span>
@@ -212,19 +266,90 @@ function PaymentPage() {
             </p>
           </div>
 
-          {/* Khalti Info */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
-            <h3 className="font-bold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
-              <CreditCard size={20} />
-              About Khalti Payment
-            </h3>
-            <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-              <li>✓ Secure payment gateway</li>
-              <li>✓ Multiple payment methods (Khalti ID, Bank, Merchants)</li>
-              <li>✓ Instant payment confirmation</li>
-              <li>✓ Safe and encrypted transactions</li>
-            </ul>
-          </div>
+          {/* Gateway Selection */}
+          {!payment || payment.status !== "completed" ? (
+            <div className="space-y-4">
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                Choose Payment Gateway
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Khalti Option */}
+                <button
+                  onClick={() => setSelectedGateway("khalti")}
+                  className={`p-6 rounded-2xl border-2 transition ${
+                    selectedGateway === "khalti"
+                      ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-blue-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-gray-900 dark:text-white">Khalti</h3>
+                    {selectedGateway === "khalti" && (
+                      <CheckCircle size={20} className="text-blue-600" />
+                    )}
+                  </div>
+                  <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-300 text-left">
+                    <li>✓ Fast & Secure</li>
+                    <li>✓ Multiple payment methods</li>
+                    <li>✓ Instant confirmation</li>
+                  </ul>
+                </button>
+
+                {/* eSewa Option */}
+                <button
+                  onClick={() => setSelectedGateway("esewa")}
+                  className={`p-6 rounded-2xl border-2 transition ${
+                    selectedGateway === "esewa"
+                      ? "border-green-600 bg-green-50 dark:bg-green-900/20"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-green-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-gray-900 dark:text-white">eSewa</h3>
+                    {selectedGateway === "esewa" && (
+                      <CheckCircle size={20} className="text-green-600" />
+                    )}
+                  </div>
+                  <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-300 text-left">
+                    <li>✓ Popular in Nepal</li>
+                    <li>✓ Secure payments</li>
+                    <li>✓ Easy transfers</li>
+                  </ul>
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Gateway Info */}
+          {selectedGateway === "khalti" && (!payment || payment.status !== "completed") && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
+              <h3 className="font-bold text-blue-900 dark:text-blue-200 mb-4 flex items-center gap-2">
+                <CreditCard size={20} />
+                About Khalti Payment
+              </h3>
+              <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
+                <li>✓ Secure payment gateway</li>
+                <li>✓ Multiple payment methods (Khalti ID, Bank, Merchants)</li>
+                <li>✓ Instant payment confirmation</li>
+                <li>✓ Safe and encrypted transactions</li>
+              </ul>
+            </div>
+          )}
+
+          {selectedGateway === "esewa" && (!payment || payment.status !== "completed") && (
+            <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-2xl border border-green-200 dark:border-green-800">
+              <h3 className="font-bold text-green-900 dark:text-green-200 mb-4 flex items-center gap-2">
+                <CreditCard size={20} />
+                About eSewa Payment
+              </h3>
+              <ul className="space-y-2 text-sm text-green-800 dark:text-green-300">
+                <li>✓ Nepal's most trusted payment gateway</li>
+                <li>✓ Multiple payment methods (eSewa ID, Bank)</li>
+                <li>✓ Instant payment confirmation</li>
+                <li>✓ Secure and encrypted transactions</li>
+              </ul>
+            </div>
+          )}
 
           {/* Error message */}
           {error && (
@@ -247,16 +372,15 @@ function PaymentPage() {
                 <button
                   onClick={() => {
                     // Generate simple receipt
-                    const receipt = `
-Payment Receipt
+                    const receipt = `Payment Receipt
 ================
 Booking ID: ${bookingId}
 Transaction ID: ${payment.transaction_id}
 Amount: Rs ${paymentDetails.amount}
+Gateway: ${payment.gateway?.toUpperCase()}
 Status: ${payment.status}
 Date: ${new Date().toLocaleString()}
                     `;
-                    // In a real app, you'd generate a PDF
                     const element = document.createElement("a");
                     element.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(receipt));
                     element.setAttribute("download", `receipt_${payment.transaction_id}.txt`);
@@ -293,30 +417,72 @@ Date: ${new Date().toLocaleString()}
                 </button>
               </>
             ) : (
-              <button
-                onClick={handleInitiatePayment}
-                disabled={processing}
-                className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {processing ? (
-                  <>
-                    <Loader size={20} className="animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard size={20} />
-                    Pay with Khalti
-                  </>
+              <>
+                {/* Continue existing payment option */}
+                {paymentDetails.pidx && selectedGateway === "khalti" && (
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={() => window.location.href = paymentDetails.payment_url}
+                      className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
+                      <CreditCard size={20} />
+                      Continue Payment
+                    </button>
+                    <button
+                      onClick={handleCancelPayment}
+                      className="flex-1 border-2 border-red-600 text-red-600 dark:text-red-400 py-4 rounded-xl font-bold hover:bg-red-50 dark:hover:bg-gray-700 transition active:scale-[0.98]"
+                    >
+                      Cancel & Start New
+                    </button>
+                  </div>
                 )}
-              </button>
+                {/* New payment buttons */}
+                {!paymentDetails.pidx && selectedGateway === "khalti" && (
+                  <button
+                    onClick={handleInitiateKhaltiPayment}
+                    disabled={processing}
+                    className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {processing ? (
+                      <>
+                        <Loader size={20} className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard size={20} />
+                        Pay with Khalti
+                      </>
+                    )}
+                  </button>
+                )}
+                {selectedGateway === "esewa" && (
+                  <button
+                    onClick={handleInitiateESewaPayment}
+                    disabled={processing}
+                    className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {processing ? (
+                      <>
+                        <Loader size={20} className="animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard size={20} />
+                        Pay with eSewa
+                      </>
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
 
           {/* Sandbox Notice */}
           <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-2xl text-sm text-orange-800 dark:text-orange-300">
             <strong>Test Mode:</strong> You're in sandbox mode. Use test credentials to complete payment. 
-            <a href="https://docs.khalti.com/khalti-epayment/" target="_blank" rel="noopener noreferrer" className="underline ml-1">
+            <a href="https://developer.esewa.com.np/pages/Test-credentials" target="_blank" rel="noopener noreferrer" className="underline ml-1">
               Learn more
             </a>
           </div>

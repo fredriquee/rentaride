@@ -549,7 +549,7 @@ function OwnerDashboard() {
                           </div>
                         )}
 
-                        {b.status === "confirmed" && new Date(b.endDate) < new Date() && (
+                        {b.status === "confirmed" && (
                           <button
                             onClick={() => updateStatus(b._id, "completed")}
                             className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"

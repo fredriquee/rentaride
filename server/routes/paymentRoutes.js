@@ -6,7 +6,10 @@ const {
   handlePaymentCallback,
   getPaymentByBooking,
   getUserPayments,
-  cancelPayment
+  cancelPayment,
+  initiateESewaPayment,
+  verifyESewaPayment,
+  handleESewaCallback
 } = require("../controllers/paymentController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
@@ -39,5 +42,22 @@ router.get("/my", authMiddleware, getUserPayments);
 // @desc    Cancel a pending payment
 // @access  Private
 router.post("/:paymentId/cancel", authMiddleware, cancelPayment);
+
+// ========== eSewa Payment Routes ==========
+
+// @route   POST /api/payments/esewa/initiate
+// @desc    Initiate an eSewa payment
+// @access  Private
+router.post("/esewa/initiate", authMiddleware, initiateESewaPayment);
+
+// @route   POST /api/payments/esewa/verify
+// @desc    Verify eSewa payment status
+// @access  Private
+router.post("/esewa/verify", authMiddleware, verifyESewaPayment);
+
+// @route   GET /api/payments/esewa/callback
+// @desc    Handle eSewa callback (success/failure redirect)
+// @access  Public
+router.get("/esewa/callback", handleESewaCallback);
 
 module.exports = router;

@@ -31,6 +31,11 @@ const vehicleSchema = new mongoose.Schema({
     type: String,
     enum: ["available", "unavailable", "maintenance"],
     default: "available"
+  },
+  fuelType: {
+    type: String,
+    enum: ["electric", "petrol", "diesel"],
+    default: "petrol"
   }
 }, { timestamps: true });
 

@@ -26,6 +26,13 @@ const paymentSchema = new mongoose.Schema({
     default: "initiated"
   },
   
+  // Payment gateway used
+  gateway: {
+    type: String,
+    enum: ["khalti", "esewa"],
+    default: "khalti"
+  },
+  
   // Khalti payment details
   pidx: {
     type: String,
@@ -38,7 +45,7 @@ const paymentSchema = new mongoose.Schema({
   },
   transaction_id: {
     type: String,
-    description: "Transaction ID from Khalti after successful payment"
+    description: "Transaction ID from Khalti/eSewa after successful payment"
   },
   tidx: {
     type: String,
@@ -47,6 +54,16 @@ const paymentSchema = new mongoose.Schema({
   khalti_mobile: {
     type: String,
     description: "Khalti ID (mobile) used for payment"
+  },
+  
+  // eSewa payment details
+  refId: {
+    type: String,
+    description: "Reference ID from eSewa"
+  },
+  esewa_mobile: {
+    type: String,
+    description: "eSewa ID (mobile) used for payment"
   },
   
   // Additional metadata

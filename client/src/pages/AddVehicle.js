@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 function AddVehicle() {
   const [title, setTitle] = useState("");
   const [type, setType] = useState("");
+  const [fuelType, setFuelType] = useState("petrol");
   const [pricePerDay, setPricePerDay] = useState("");
   const [location, setLocation] = useState("");
   const [image, setImage] = useState("");
@@ -84,6 +85,7 @@ function AddVehicle() {
       const formData = new FormData();
       formData.append("title", title);
       formData.append("type", type);
+      formData.append("fuelType", fuelType);
       formData.append("pricePerDay", pricePerDay);
       formData.append("location", location);
       formData.append("image", image);
@@ -131,7 +133,7 @@ function AddVehicle() {
               <input
                 type="text"
                 required
-                className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder="e.g. Honda Activa 6G"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -147,7 +149,7 @@ function AddVehicle() {
               </div>
               <select
                 required
-                className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition appearance-none bg-white dark:bg-gray-800"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition appearance-none"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
               >
@@ -160,7 +162,22 @@ function AddVehicle() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Price Per Day (Rs)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Fuel Type</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Tag size={18} />
+              </div>
+              <select
+                required
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition appearance-none"
+                value={fuelType}
+                onChange={(e) => setFuelType(e.target.value)}
+              >
+                <option value="electric">Electric</option>
+                <option value="petrol">Petrol</option>
+                <option value="diesel">Diesel</option>
+              </select>
+            </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <IndianRupee size={18} />
@@ -168,7 +185,7 @@ function AddVehicle() {
               <input
                 type="number"
                 required
-                className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder="500"
                 value={pricePerDay}
                 onChange={(e) => setPricePerDay(e.target.value)}
@@ -184,7 +201,7 @@ function AddVehicle() {
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border dark:border-gray-700 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 placeholder="e.g. Kathmandu, Nepal"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}

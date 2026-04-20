@@ -68,7 +68,7 @@ exports.getUserBookings = asyncHandler(async (req, res) => {
     select: "title type pricePerDay location owner image",
     populate: {
       path: "owner",
-      select: "name email",
+      select: "name email phone",
     },
   });
 
@@ -111,11 +111,11 @@ exports.updateBookingStatus = asyncHandler(async (req, res) => {
       throw new Error(`Cannot cancel a booking that is ${booking.status}`);
     }
   } else if (status === "completed") {
-    if (booking.status === "confirmed" && new Date(booking.endDate) < new Date()) {
+    if (booking.status === "confirmed") {
       booking.status = "completed";
     } else {
       res.status(400);
-      throw new Error("Booking can only be completed after its end date and if it's confirmed");
+      throw new Error("Booking can only be completed if it's confirmed");
     }
   } else {
     res.status(400);
@@ -138,7 +138,7 @@ exports.getOwnerBookings = asyncHandler(async (req, res) => {
   // Find all bookings for these vehicles
   const bookings = await Booking.find({ vehicle: { $in: vehicleIds } })
     .populate("user", "name email")
-    .populate("vehicle", "title pricePerDay type image location");
+    .populate("vehicle");
 
   res.json(bookings);
 });
