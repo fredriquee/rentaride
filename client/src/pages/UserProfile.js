@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
 import { Car, ArrowLeft } from "lucide-react";
@@ -21,8 +21,8 @@ const UserProfile = () => {
       try {
         setLoading(true);
         // Fetch user profile info
-        const userResponse = await axios.get(
-          `http://localhost:5000/api/vehicles/user/${displayUserId}`
+        const userResponse = await API.get(
+          `/vehicles/user/${displayUserId}`
         );
 
         // Get user name from the first vehicle's owner data, or set a default
@@ -121,7 +121,7 @@ const UserProfile = () => {
                 <div className="relative h-48 bg-gray-200 dark:bg-gray-700 overflow-hidden">
                   {vehicle.image ? (
                     <img
-                      src={vehicle.image.startsWith('http') ? vehicle.image : `http://localhost:5000${vehicle.image}`}
+                      src={vehicle.image.startsWith('http') ? vehicle.image : `${API.defaults.baseURL}${vehicle.image}`}
                       alt={vehicle.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                     />

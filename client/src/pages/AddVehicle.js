@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { Car, Tag, IndianRupee, MapPin, Image as ImageIcon, PlusCircle, Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -95,7 +96,7 @@ function AddVehicle() {
         formData.append("images", fileObj.file);
       });
 
-      await axios.post("http://localhost:5000/api/vehicles", formData, {
+      await API.post("/vehicles", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

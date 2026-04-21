@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard, Phone, User, Mail, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +17,7 @@ function MyBookings() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/bookings/my", {
+      const res = await API.get("/bookings/my", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -35,7 +35,7 @@ function MyBookings() {
       for (const booking of activeBookings) {
         if (booking.paymentId) {
           try {
-            const paymentRes = await axios.get(`http://localhost:5000/api/payments/booking/${booking._id}`, {
+            const paymentRes = await API.get(`/payments/booking/${booking._id}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
@@ -125,8 +125,8 @@ function MyBookings() {
     }
     setSubmittingCancellation(true);
     try {
-      await axios.put(
-        `http://localhost:5000/api/bookings/${selectedBookingId}/request-cancellation`,
+      await API.put(
+        `/bookings/${selectedBookingId}/request-cancellation`,
         { cancellationReason },
         {
           headers: {
@@ -208,7 +208,7 @@ function MyBookings() {
             <div key={booking._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden flex flex-col md:flex-row">
               <div className="md:w-1/3 h-48 md:h-auto bg-gray-100 dark:bg-gray-800 relative">
                 {booking.vehicle?.image ? (
-                  <img src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `http://localhost:5000${booking.vehicle.image}`} alt={booking.vehicle.title} className="w-full h-full object-cover" />
+                  <img src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `${API.defaults.baseURL}${booking.vehicle.image}`} alt={booking.vehicle.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
                     <Car size={48} />

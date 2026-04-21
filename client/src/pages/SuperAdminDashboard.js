@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { Users, Car, CalendarDays, Trash2, ShieldCheck, Search, X, ChevronDown, DollarSign, AlertCircle, Mail } from "lucide-react";
 
@@ -28,11 +28,11 @@ function SuperAdminDashboard() {
   const fetchData = async () => {
     try {
       const [usersRes, vehiclesRes, bookingsRes, paymentsRes, statsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/admin/users", { headers }),
-        axios.get("http://localhost:5000/api/admin/vehicles", { headers }),
-        axios.get("http://localhost:5000/api/admin/bookings", { headers }),
-        axios.get("http://localhost:5000/api/admin/payments", { headers }),
-        axios.get("http://localhost:5000/api/admin/statistics", { headers })
+        API.get("/admin/users", { headers }),
+        API.get("/admin/vehicles", { headers }),
+        API.get("/admin/bookings", { headers }),
+        API.get("/admin/payments", { headers }),
+        API.get("/admin/statistics", { headers })
       ]);
 
       setUsers(usersRes.data);
@@ -78,7 +78,7 @@ function SuperAdminDashboard() {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/admin/${type}s/${id}`, { headers });
+      await API.delete(`/admin/${type}s/${id}`, { headers });
       toast.success(`${type} deleted successfully`);
       fetchData();
     } catch (error) {
@@ -88,7 +88,7 @@ function SuperAdminDashboard() {
 
   const updateUserRole = async (id, role) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/users/${id}`, { role }, { headers });
+      await API.put(`/admin/users/${id}`, { role }, { headers });
       toast.success("User role updated");
       fetchData();
     } catch (error) {
@@ -98,7 +98,7 @@ function SuperAdminDashboard() {
 
   const updateVehicleStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/vehicles/${id}`, { status }, { headers });
+      await API.put(`/admin/vehicles/${id}`, { status }, { headers });
       toast.success("Vehicle status updated");
       fetchData();
     } catch (error) {
@@ -108,7 +108,7 @@ function SuperAdminDashboard() {
 
   const updateBookingStatus = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/admin/bookings/${id}`, { status }, { headers });
+      await API.put(`/admin/bookings/${id}`, { status }, { headers });
       toast.success("Booking status updated");
       fetchData();
       setSelectedBooking(null);
@@ -121,7 +121,7 @@ function SuperAdminDashboard() {
     if (!window.confirm("Process refund for this payment?")) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/admin/payments/${paymentId}`, { status: "refunded" }, { headers });
+      await API.put(`/admin/payments/${paymentId}`, { status: "refunded" }, { headers });
       toast.success("Refund processed successfully");
       fetchData();
       setSelectedBooking(null);
@@ -134,14 +134,14 @@ function SuperAdminDashboard() {
     if (!window.confirm("Cancel this booking? A refund will be issued.")) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/admin/bookings/${bookingId}`, { status: "cancelled" }, { headers });
+      await API.put(`/admin/bookings/${bookingId}`, { status: "cancelled" }, { headers });
       
       // Find and refund associated payment
       const booking = bookings.find(b => b._id === bookingId);
       if (booking) {
         const payment = payments.find(p => p.booking === bookingId && p.status === "completed");
         if (payment) {
-          await axios.put(`http://localhost:5000/api/admin/payments/${payment._id}`, { status: "refunded" }, { headers });
+          await API.put(`/admin/payments/${payment._id}`, { status: "refunded" }, { headers });
         }
       }
       

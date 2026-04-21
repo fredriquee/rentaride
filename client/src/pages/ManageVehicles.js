@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon, Phone, MapPin } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
@@ -24,7 +24,7 @@ function ManageVehicles() {
 
   const fetchVehicles = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/vehicles/my", {
+      const res = await API.get("/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(res.data);
@@ -112,7 +112,7 @@ function ManageVehicles() {
         formData.append("images", fileObj.file);
       });
 
-      await axios.put(`http://localhost:5000/api/vehicles/${vehicleId}`, formData, {
+      await API.put(`/vehicles/${vehicleId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -132,7 +132,7 @@ function ManageVehicles() {
     if (!window.confirm("Delete this image?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/vehicles/${vehicleId}/image`, {
+      await API.delete(`/vehicles/${vehicleId}/image`, {
         data: { imageUrl },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -146,8 +146,8 @@ function ManageVehicles() {
 
   const handleStatusChange = async (vehicleId, newStatus) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/vehicles/${vehicleId}`,
+      await API.put(
+        `/vehicles/${vehicleId}`,
         { status: newStatus },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -165,7 +165,7 @@ function ManageVehicles() {
     if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/vehicles/${vehicleId}`, {
+      await API.delete(`/vehicles/${vehicleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -363,7 +363,7 @@ function ManageVehicles() {
                             src={
                               editForm.currentImage.startsWith("http")
                                 ? editForm.currentImage
-                                : `http://localhost:5000${editForm.currentImage}`
+                                : `${API.defaults.baseURL}${editForm.currentImage}`
                             }
                             alt="Current"
                             className="w-full h-full object-cover rounded-lg border dark:border-gray-600"
@@ -446,7 +446,7 @@ function ManageVehicles() {
                         src={
                           vehicle.image.startsWith("http")
                             ? vehicle.image
-                            : `http://localhost:5000${vehicle.image}`
+                            : `${API.defaults.baseURL}${vehicle.image}`
                         }
                         alt={vehicle.title}
                         className="w-full h-full object-cover"

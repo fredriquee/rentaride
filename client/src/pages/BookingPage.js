@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, Phone, User, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -19,11 +19,11 @@ function BookingPage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/vehicles`);
+        const res = await API.get(`/vehicles`);
         const found = res.data.find(v => v._id === id);
         if (found) {
           // Fetch full vehicle details including owner
-          const detailedRes = await axios.get(`http://localhost:5000/api/vehicles/${id}`);
+          const detailedRes = await API.get(`/vehicles/${id}`);
           setVehicle(detailedRes.data);
           // Extract address from location object or use string directly
           const locationAddress = typeof detailedRes.data.location === 'string' 
@@ -75,8 +75,8 @@ function BookingPage() {
     const token = localStorage.getItem("token");
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/bookings",
+      await API.post(
+        "/bookings",
         {
           vehicle: id,
           startDate,
@@ -107,7 +107,7 @@ function BookingPage() {
           <div className="relative rounded-lg sm:rounded-2xl overflow-hidden mb-4 sm:mb-6 aspect-video bg-gray-200 shadow-inner">
             {vehicle.image ? (
               <img
-                src={vehicle.image.startsWith('http') ? vehicle.image : `http://localhost:5000${vehicle.image}`}
+                src={vehicle.image.startsWith('http') ? vehicle.image : `${API.defaults.baseURL}${vehicle.image}`}
                 alt={vehicle.title}
                 className="w-full h-full object-cover"
               />

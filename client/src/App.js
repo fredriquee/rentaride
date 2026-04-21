@@ -17,7 +17,7 @@ import Settings from "./pages/Settings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "./api";
 import ThemeToggle from "./components/ThemeToggle";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -36,7 +36,7 @@ const Navbar = () => {
       if (user && user.currentRole === "owner") {
         try {
           const token = localStorage.getItem("token");
-          const res = await axios.get("http://localhost:5000/api/bookings/owner/notifications", {
+          const res = await API.get("/bookings/owner/notifications", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setOwnerNotificationCount(res.data.count);

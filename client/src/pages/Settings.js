@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Eye, EyeOff, Save } from "lucide-react";
@@ -38,8 +38,8 @@ const Settings = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const { data } = await axios.put(
-        "http://localhost:5000/api/auth/update-profile",
+      const { data } = await API.put(
+        "/auth/update-profile",
         { name, phone },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -89,8 +89,8 @@ const Settings = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      await axios.put(
-        "http://localhost:5000/api/auth/change-password",
+      await API.put(
+        "/auth/change-password",
         {
           currentPassword,
           newPassword,

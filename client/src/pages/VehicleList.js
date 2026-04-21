@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import { MapPin, Tag, Car, Fuel, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
@@ -25,7 +25,7 @@ function VehicleList() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/vehicles");
+        const res = await API.get("/vehicles");
         setVehicles(res.data);
         setFilteredVehicles(res.data);
       } catch (error) {
@@ -135,7 +135,7 @@ function VehicleList() {
             <div className="h-48 sm:h-60 md:h-72 bg-gray-200 relative overflow-hidden">
               {v.image ? (
                 <img
-                  src={v.image.startsWith('http') ? v.image : `http://localhost:5000${v.image}`}
+                  src={v.image.startsWith('http') ? v.image : `${API.defaults.baseURL}${v.image}`}
                   alt={v.title}
                   className={`w-full h-full object-cover group-hover:scale-105 transition duration-300 ${
                     v.status !== "available" ? "opacity-50" : ""

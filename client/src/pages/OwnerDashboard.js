@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -56,14 +56,14 @@ function OwnerDashboard() {
       const token = localStorage.getItem("token");
 
       // Fetch bookings
-      const bookingsRes = await axios.get("http://localhost:5000/api/bookings/owner", {
+      const bookingsRes = await API.get("/bookings/owner", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const allBookings = bookingsRes.data || [];
       setBookings(allBookings);
 
       // Fetch vehicles
-      const vehiclesRes = await axios.get("http://localhost:5000/api/vehicles/my", {
+      const vehiclesRes = await API.get("/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const allVehicles = vehiclesRes.data || [];
@@ -153,7 +153,7 @@ function OwnerDashboard() {
       for (const booking of allBookings) {
         if (booking.paymentId) {
           try {
-            const paymentRes = await axios.get(`http://localhost:5000/api/payments/booking/${booking._id}`, {
+            const paymentRes = await API.get(`/payments/booking/${booking._id}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             paymentsMap[booking._id] = paymentRes.data.payment;
@@ -174,8 +174,8 @@ function OwnerDashboard() {
 
   const updateStatus = async (id, status) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/bookings/${id}`,
+      await API.put(
+        `/bookings/${id}`,
         { status },
         {
           headers: {
@@ -483,7 +483,7 @@ function OwnerDashboard() {
                       <div className="md:w-1/4 h-48 md:h-auto bg-gray-100 dark:bg-gray-800">
                         {b.vehicle?.image ? (
                           <img
-                            src={b.vehicle.image.startsWith('http') ? b.vehicle.image : `http://localhost:5000${b.vehicle.image}`}
+                            src={b.vehicle.image.startsWith('http') ? b.vehicle.image : `${API.defaults.baseURL}${b.vehicle.image}`}
                             alt={b.vehicle.title}
                             className="w-full h-full object-cover"
                           />
@@ -636,7 +636,7 @@ function OwnerDashboard() {
                     <div className="h-48 bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
                       {vehicle.image ? (
                         <img
-                          src={vehicle.image.startsWith('http') ? vehicle.image : `http://localhost:5000${vehicle.image}`}
+                          src={vehicle.image.startsWith('http') ? vehicle.image : `${API.defaults.baseURL}${vehicle.image}`}
                           alt={vehicle.title}
                           className="w-full h-full object-cover"
                         />

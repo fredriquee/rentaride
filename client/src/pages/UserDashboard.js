@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api";
 import { toast } from "react-hot-toast";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -45,7 +45,7 @@ function UserDashboard() {
       const token = localStorage.getItem("token");
 
       // Fetch all bookings
-      const bookingsRes = await axios.get("http://localhost:5000/api/bookings/my", {
+      const bookingsRes = await API.get("/bookings/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -308,7 +308,7 @@ function UserDashboard() {
                     <div className="flex-shrink-0">
                       {booking.vehicle?.image ? (
                         <img
-                          src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `http://localhost:5000${booking.vehicle.image}`}
+                          src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `${API.defaults.baseURL}${booking.vehicle.image}`}
                           alt={booking.vehicle.title}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
@@ -374,7 +374,7 @@ function UserDashboard() {
                         <div className="flex items-start gap-4 flex-1">
                           {booking.vehicle?.image ? (
                             <img
-                              src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `http://localhost:5000${booking.vehicle.image}`}
+                              src={booking.vehicle.image.startsWith('http') ? booking.vehicle.image : `${API.defaults.baseURL}${booking.vehicle.image}`}
                               alt={booking.vehicle.title}
                               className="w-20 h-20 object-cover rounded-lg"
                             />

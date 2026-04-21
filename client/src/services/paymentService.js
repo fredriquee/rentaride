@@ -1,6 +1,6 @@
-import axios from "axios";
+import API from "../api";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = API.defaults.baseURL;
 
 const paymentService = {
   /**
@@ -10,8 +10,8 @@ const paymentService = {
    */
   initiatePayment: async (bookingId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/initiate`,
+      const response = await API.post(
+        `/payments/initiate`,
         { bookingId },
         {
           headers: {
@@ -35,8 +35,8 @@ const paymentService = {
    */
   verifyPayment: async (pidx, bookingId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/verify`,
+      const response = await API.post(
+        `/payments/verify`,
         { pidx, bookingId },
         {
           headers: {
@@ -59,8 +59,8 @@ const paymentService = {
    */
   getPaymentByBooking: async (bookingId) => {
     try {
-      const response = await axios.get(
-        `${API_URL}/payments/booking/${bookingId}`,
+      const response = await API.get(
+        `/payments/booking/${bookingId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -88,10 +88,10 @@ const paymentService = {
       };
       
       const url = status
-        ? `${API_URL}/payments/my?status=${status}`
-        : `${API_URL}/payments/my`;
+        ? `/payments/my?status=${status}`
+        : `/payments/my`;
       
-      const response = await axios.get(url, config);
+      const response = await API.get(url, config);
       return response.data;
     } catch (error) {
       console.error("Get user payments error:", error);
@@ -106,8 +106,8 @@ const paymentService = {
    */
   cancelPayment: async (paymentId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/${paymentId}/cancel`,
+      const response = await API.post(
+        `/payments/${paymentId}/cancel`,
         {},
         {
           headers: {
@@ -145,8 +145,8 @@ const paymentService = {
    */
   initiateESewaPayment: async (bookingId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/esewa/initiate`,
+      const response = await API.post(
+        `/payments/esewa/initiate`,
         { bookingId },
         {
           headers: {
@@ -170,8 +170,8 @@ const paymentService = {
    */
   verifyESewaPayment: async (oid, refId) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/payments/esewa/verify`,
+      const response = await API.post(
+        `/payments/esewa/verify`,
         { oid, refId },
         {
           headers: {
