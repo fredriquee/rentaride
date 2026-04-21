@@ -12,11 +12,17 @@ const app = express();
 
 // Serve uploaded files statically with proper CORS headers BEFORE security middleware
 app.use("/uploads", (req, res, next) => {
-  // Set CORS headers for uploads - allow all origins for image serving
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  res.header("Cross-Origin-Resource-Policy", "cross-origin");
+  // Set permissive CORS headers for image files
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "*");
+  res.setHeader("Access-Control-Max-Age", "3600");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  
+  // Handle OPTIONS requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
   next();
 }, express.static("uploads"));
 
@@ -52,7 +58,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true });
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Logging
 if (process.env.NODE_ENV === "development") {
