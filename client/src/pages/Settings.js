@@ -39,7 +39,7 @@ const Settings = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       const { data } = await API.put(
-        "/auth/update-profile",
+        "/api/auth/update-profile",
         { name, phone },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -90,7 +90,7 @@ const Settings = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
       await API.put(
-        "/auth/change-password",
+        "/api/auth/change-password",
         {
           currentPassword,
           newPassword,

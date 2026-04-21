@@ -17,7 +17,7 @@ function MyBookings() {
 
   const fetchBookings = async () => {
     try {
-      const res = await API.get("/bookings/my", {
+      const res = await API.get("/api/bookings/my", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -35,7 +35,7 @@ function MyBookings() {
       for (const booking of activeBookings) {
         if (booking.paymentId) {
           try {
-            const paymentRes = await API.get(`/payments/booking/${booking._id}`, {
+            const paymentRes = await API.get(`/api/payments/booking/${booking._id}`, {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
               },
@@ -126,7 +126,7 @@ function MyBookings() {
     setSubmittingCancellation(true);
     try {
       await API.put(
-        `/bookings/${selectedBookingId}/request-cancellation`,
+        `/api/bookings/${selectedBookingId}/request-cancellation`,
         { cancellationReason },
         {
           headers: {

@@ -28,11 +28,11 @@ function SuperAdminDashboard() {
   const fetchData = async () => {
     try {
       const [usersRes, vehiclesRes, bookingsRes, paymentsRes, statsRes] = await Promise.all([
-        API.get("/admin/users", { headers }),
-        API.get("/admin/vehicles", { headers }),
-        API.get("/admin/bookings", { headers }),
-        API.get("/admin/payments", { headers }),
-        API.get("/admin/statistics", { headers })
+        API.get("/api/admin/users", { headers }),
+        API.get("/api/admin/vehicles", { headers }),
+        API.get("/api/admin/bookings", { headers }),
+        API.get("/api/admin/payments", { headers }),
+        API.get("/api/admin/statistics", { headers })
       ]);
 
       setUsers(usersRes.data);
@@ -78,7 +78,7 @@ function SuperAdminDashboard() {
     if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
 
     try {
-      await API.delete(`/admin/${type}s/${id}`, { headers });
+      await API.delete(`/api/admin/${type}s/${id}`, { headers });
       toast.success(`${type} deleted successfully`);
       fetchData();
     } catch (error) {
@@ -88,7 +88,7 @@ function SuperAdminDashboard() {
 
   const updateUserRole = async (id, role) => {
     try {
-      await API.put(`/admin/users/${id}`, { role }, { headers });
+      await API.put(`/api/admin/users/${id}`, { role }, { headers });
       toast.success("User role updated");
       fetchData();
     } catch (error) {
@@ -98,7 +98,7 @@ function SuperAdminDashboard() {
 
   const updateVehicleStatus = async (id, status) => {
     try {
-      await API.put(`/admin/vehicles/${id}`, { status }, { headers });
+      await API.put(`/api/admin/vehicles/${id}`, { status }, { headers });
       toast.success("Vehicle status updated");
       fetchData();
     } catch (error) {
@@ -108,7 +108,7 @@ function SuperAdminDashboard() {
 
   const updateBookingStatus = async (id, status) => {
     try {
-      await API.put(`/admin/bookings/${id}`, { status }, { headers });
+      await API.put(`/api/admin/bookings/${id}`, { status }, { headers });
       toast.success("Booking status updated");
       fetchData();
       setSelectedBooking(null);
@@ -121,7 +121,7 @@ function SuperAdminDashboard() {
     if (!window.confirm("Process refund for this payment?")) return;
 
     try {
-      await API.put(`/admin/payments/${paymentId}`, { status: "refunded" }, { headers });
+      await API.put(`/api/admin/payments/${paymentId}`, { status: "refunded" }, { headers });
       toast.success("Refund processed successfully");
       fetchData();
       setSelectedBooking(null);
@@ -134,14 +134,14 @@ function SuperAdminDashboard() {
     if (!window.confirm("Cancel this booking? A refund will be issued.")) return;
 
     try {
-      await API.put(`/admin/bookings/${bookingId}`, { status: "cancelled" }, { headers });
+      await API.put(`/api/admin/bookings/${bookingId}`, { status: "cancelled" }, { headers });
       
       // Find and refund associated payment
       const booking = bookings.find(b => b._id === bookingId);
       if (booking) {
         const payment = payments.find(p => p.booking === bookingId && p.status === "completed");
         if (payment) {
-          await API.put(`/admin/payments/${payment._id}`, { status: "refunded" }, { headers });
+          await API.put(`/api/admin/payments/${payment._id}`, { status: "refunded" }, { headers });
         }
       }
       

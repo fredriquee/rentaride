@@ -56,14 +56,14 @@ function OwnerDashboard() {
       const token = localStorage.getItem("token");
 
       // Fetch bookings
-      const bookingsRes = await API.get("/bookings/owner", {
+      const bookingsRes = await API.get("/api/bookings/owner", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const allBookings = bookingsRes.data || [];
       setBookings(allBookings);
 
       // Fetch vehicles
-      const vehiclesRes = await API.get("/vehicles/my", {
+      const vehiclesRes = await API.get("/api/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const allVehicles = vehiclesRes.data || [];
@@ -153,7 +153,7 @@ function OwnerDashboard() {
       for (const booking of allBookings) {
         if (booking.paymentId) {
           try {
-            const paymentRes = await API.get(`/payments/booking/${booking._id}`, {
+            const paymentRes = await API.get(`/api/payments/booking/${booking._id}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             paymentsMap[booking._id] = paymentRes.data.payment;
@@ -175,7 +175,7 @@ function OwnerDashboard() {
   const updateStatus = async (id, status) => {
     try {
       await API.put(
-        `/bookings/${id}`,
+        `/api/bookings/${id}`,
         { status },
         {
           headers: {

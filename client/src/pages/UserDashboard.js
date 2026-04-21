@@ -45,7 +45,7 @@ function UserDashboard() {
       const token = localStorage.getItem("token");
 
       // Fetch all bookings
-      const bookingsRes = await API.get("/bookings/my", {
+      const bookingsRes = await API.get("/api/bookings/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

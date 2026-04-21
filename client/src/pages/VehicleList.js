@@ -25,7 +25,7 @@ function VehicleList() {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const res = await API.get("/vehicles");
+        const res = await API.get("/api/vehicles");
         setVehicles(res.data);
         setFilteredVehicles(res.data);
       } catch (error) {

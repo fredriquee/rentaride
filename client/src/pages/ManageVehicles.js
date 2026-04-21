@@ -24,7 +24,7 @@ function ManageVehicles() {
 
   const fetchVehicles = async () => {
     try {
-      const res = await API.get("/vehicles/my", {
+      const res = await API.get("/api/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(res.data);
@@ -112,7 +112,7 @@ function ManageVehicles() {
         formData.append("images", fileObj.file);
       });
 
-      await API.put(`/vehicles/${vehicleId}`, formData, {
+      await API.put(`/api/vehicles/${vehicleId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -132,7 +132,7 @@ function ManageVehicles() {
     if (!window.confirm("Delete this image?")) return;
 
     try {
-      await API.delete(`/vehicles/${vehicleId}/image`, {
+      await API.delete(`/api/vehicles/${vehicleId}/image`, {
         data: { imageUrl },
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -147,7 +147,7 @@ function ManageVehicles() {
   const handleStatusChange = async (vehicleId, newStatus) => {
     try {
       await API.put(
-        `/vehicles/${vehicleId}`,
+        `/api/vehicles/${vehicleId}`,
         { status: newStatus },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -165,7 +165,7 @@ function ManageVehicles() {
     if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
 
     try {
-      await API.delete(`/vehicles/${vehicleId}`, {
+      await API.delete(`/api/vehicles/${vehicleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

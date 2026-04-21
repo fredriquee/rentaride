@@ -96,7 +96,7 @@ function AddVehicle() {
         formData.append("images", fileObj.file);
       });
 
-      await API.post("/vehicles", formData, {
+      await API.post("/api/vehicles", formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },

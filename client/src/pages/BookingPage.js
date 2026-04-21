@@ -19,11 +19,11 @@ function BookingPage() {
   useEffect(() => {
     const fetchVehicle = async () => {
       try {
-        const res = await API.get(`/vehicles`);
+        const res = await API.get(`/api/vehicles`);
         const found = res.data.find(v => v._id === id);
         if (found) {
           // Fetch full vehicle details including owner
-          const detailedRes = await API.get(`/vehicles/${id}`);
+          const detailedRes = await API.get(`/api/vehicles/${id}`);
           setVehicle(detailedRes.data);
           // Extract address from location object or use string directly
           const locationAddress = typeof detailedRes.data.location === 'string' 
@@ -76,7 +76,7 @@ function BookingPage() {
 
     try {
       await API.post(
-        "/bookings",
+        "/api/bookings",
         {
           vehicle: id,
           startDate,

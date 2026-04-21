@@ -11,7 +11,7 @@ const paymentService = {
   initiatePayment: async (bookingId) => {
     try {
       const response = await API.post(
-        `/payments/initiate`,
+        `/api/payments/initiate`,
         { bookingId },
         {
           headers: {
@@ -36,7 +36,7 @@ const paymentService = {
   verifyPayment: async (pidx, bookingId) => {
     try {
       const response = await API.post(
-        `/payments/verify`,
+        `/api/payments/verify`,
         { pidx, bookingId },
         {
           headers: {
@@ -60,7 +60,7 @@ const paymentService = {
   getPaymentByBooking: async (bookingId) => {
     try {
       const response = await API.get(
-        `/payments/booking/${bookingId}`,
+        `/api/payments/booking/${bookingId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -88,8 +88,8 @@ const paymentService = {
       };
       
       const url = status
-        ? `/payments/my?status=${status}`
-        : `/payments/my`;
+        ? `/api/payments/my?status=${status}`
+        : `/api/payments/my`;
       
       const response = await API.get(url, config);
       return response.data;
@@ -107,7 +107,7 @@ const paymentService = {
   cancelPayment: async (paymentId) => {
     try {
       const response = await API.post(
-        `/payments/${paymentId}/cancel`,
+        `/api/payments/${paymentId}/cancel`,
         {},
         {
           headers: {
@@ -146,7 +146,7 @@ const paymentService = {
   initiateESewaPayment: async (bookingId) => {
     try {
       const response = await API.post(
-        `/payments/esewa/initiate`,
+        `/api/payments/esewa/initiate`,
         { bookingId },
         {
           headers: {
@@ -171,7 +171,7 @@ const paymentService = {
   verifyESewaPayment: async (oid, refId) => {
     try {
       const response = await API.post(
-        `/payments/esewa/verify`,
+        `/api/payments/esewa/verify`,
         { oid, refId },
         {
           headers: {

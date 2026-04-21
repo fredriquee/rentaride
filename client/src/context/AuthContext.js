@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const { data } = await API.post("/auth/login", {
+    const { data } = await API.post("/api/auth/login", {
       email,
       password,
     });
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (name, email, password, phone, role) => {
-    const { data } = await API.post("/auth/register", {
+    const { data } = await API.post("/api/auth/register", {
       name,
       email,
       password,
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const switchRole = async (newRole) => {
-    const { data } = await API.put("/auth/switch-role", {
+    const { data } = await API.put("/api/auth/switch-role", {
       newRole,
     }, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
