@@ -8,6 +8,10 @@ const morgan = require("morgan");
 const { rateLimit } = require("express-rate-limit");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
+console.log("🚀 Verifying Payment Gateway Configuration...");
+console.log(`✓ KHALTI_SECRET_KEY: ${process.env.KHALTI_SECRET_KEY ? "✅ SET" : "❌ MISSING"}`);
+console.log(`✓ KHALTI_PUBLIC_KEY: ${process.env.KHALTI_PUBLIC_KEY ? "✅ SET" : "❌ MISSING"}`);
+
 const app = express();
 
 // Serve uploaded files statically with proper CORS headers BEFORE security middleware
