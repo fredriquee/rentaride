@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://your-backend.onrender.com",
+  baseURL: "https://rentaride-gifa.onrender.com",
 });
 
 export default API;
