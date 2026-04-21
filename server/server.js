@@ -20,7 +20,14 @@ const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl requests, etc)
     // Allow requests from localhost and production domain
-    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('mandipdas.com.np') || process.env.CORS_ORIGIN === origin) {
+    const allowedOrigins = [
+      'localhost',
+      '127.0.0.1',
+      'mandipdas.com.np',
+      'https://mandipdas.com.np'
+    ];
+    
+    if (!origin || allowedOrigins.some(allowed => origin.includes(allowed)) || process.env.CORS_ORIGIN === origin) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'), false);
@@ -28,7 +35,8 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  allowedHeaders: ["Content-Type", "Authorization"]
 };
 
 app.use(cors(corsOptions));
