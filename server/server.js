@@ -18,6 +18,7 @@ app.use("/uploads", (req, res, next) => {
   res.setHeader("Access-Control-Allow-Headers", "*");
   res.setHeader("Access-Control-Max-Age", "3600");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.setHeader("Access-Control-Expose-Headers", "*");
   
   // Handle OPTIONS requests
   if (req.method === "OPTIONS") {
@@ -26,9 +27,11 @@ app.use("/uploads", (req, res, next) => {
   next();
 }, express.static("uploads"));
 
-// Security Middleware
+// Security Middleware - skip for /uploads
 app.use(helmet({
-  crossOriginResourcePolicy: false, // Allow cross-origin access to static files
+  skip: (req) => req.path.startsWith("/uploads"),
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false
 }));
 
 // CORS Configuration - More flexible for development
