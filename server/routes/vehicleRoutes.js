@@ -12,7 +12,7 @@ const {
 } = require("../controllers/vehicleController");
 
 const { authMiddleware, ownerMiddleware } = require("../middleware/authMiddleware");
-const upload = require("../middleware/uploadMiddleware");
+const { upload } = require("../middleware/cloudinaryUpload");
 
 // Get all vehicles (public)
 router.get("/", getAllVehicles);

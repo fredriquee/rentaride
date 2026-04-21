@@ -1,7 +1,6 @@
 const Vehicle = require("../models/Vehicle");
 const asyncHandler = require("express-async-handler");
-const fs = require("fs");
-const path = require("path");
+const { cloudinary } = require("../middleware/cloudinaryUpload");
 
 // @desc    Add a new vehicle
 // @route   POST /api/vehicles
@@ -24,9 +23,9 @@ exports.addVehicle = asyncHandler(async (req, res) => {
     throw new Error("Price per day must be a positive number");
   }
 
-  // Get uploaded file paths
+  // Get uploaded file paths from Cloudinary
   const images = req.files
-    ? req.files.map((file) => `/uploads/${file.filename}`)
+    ? req.files.map((file) => file.path)
     : [];
 
   console.log("Processed images array:", images);
@@ -137,16 +136,19 @@ exports.updateVehicle = asyncHandler(async (req, res) => {
 
   // Handle new image uploads (replace old one)
   if (req.files && req.files.length > 0) {
-    // Delete old image if it exists
-    if (vehicle.image && vehicle.image.startsWith("/uploads/")) {
-      const oldPath = path.join(__dirname, `..${vehicle.image}`);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    // Delete old image from Cloudinary if it exists
+    if (vehicle.image && vehicle.image.includes("cloudinary")) {
+      try {
+        // Extract public_id from Cloudinary URL
+        const publicId = vehicle.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+      } catch (error) {
+        console.error("Error deleting old image from Cloudinary:", error);
       }
     }
 
-    // Set new image
-    const newImagePath = `/uploads/${req.files[0].filename}`;
+    // Set new image from Cloudinary
+    const newImagePath = req.files[0].path;
     vehicle.image = newImagePath;
     vehicle.images = [newImagePath];
   }
@@ -182,11 +184,14 @@ exports.deleteVehicleImage = asyncHandler(async (req, res) => {
     vehicle.images = vehicle.images.filter(img => img !== imageUrl);
   }
 
-  // Delete file from server
-  if (imageUrl.startsWith("/uploads/")) {
-    const fullPath = path.join(__dirname, `..${imageUrl}`);
-    if (fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
+  // Delete file from Cloudinary if it's a Cloudinary URL
+  if (imageUrl.includes("cloudinary")) {
+    try {
+      // Extract public_id from Cloudinary URL
+      const publicId = imageUrl.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+    } catch (error) {
+      console.error("Error deleting image from Cloudinary:", error);
     }
   }
 
