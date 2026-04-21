@@ -37,7 +37,14 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Serve uploaded files statically with proper headers
-app.use("/uploads", express.static("uploads", {
+app.use("/uploads", (req, res, next) => {
+  // Set CORS headers for uploads
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, express.static("uploads", {
   setHeaders: (res, path) => {
     res.set("Cross-Origin-Resource-Policy", "cross-origin");
   }
