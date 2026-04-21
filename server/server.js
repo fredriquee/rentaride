@@ -19,8 +19,8 @@ app.use(helmet({
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (mobile apps, curl requests, etc)
-    // Allow requests from localhost
-    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || process.env.CORS_ORIGIN === origin) {
+    // Allow requests from localhost and production domain
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('mandipdas.com.np') || process.env.CORS_ORIGIN === origin) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'), false);
