@@ -216,14 +216,19 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
     throw new Error("Not authorized to delete this vehicle");
   }
 
-  // Delete uploaded images from server
+  // Delete uploaded images from Cloudinary
   if (vehicle.images && vehicle.images.length > 0) {
-    vehicle.images.forEach((imagePath) => {
-      const fullPath = path.join(__dirname, `..${imagePath}`);
-      if (fs.existsSync(fullPath)) {
-        fs.unlinkSync(fullPath);
+    for (const imagePath of vehicle.images) {
+      if (imagePath.includes("cloudinary")) {
+        try {
+          // Extract public_id from Cloudinary URL
+          const publicId = imagePath.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+        } catch (error) {
+          console.error("Error deleting image from Cloudinary:", error);
+        }
       }
-    });
+    }
   }
 
   await vehicle.deleteOne();
