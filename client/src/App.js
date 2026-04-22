@@ -36,7 +36,7 @@ const Navbar = () => {
       if (user && user.currentRole === "owner") {
         try {
           const token = localStorage.getItem("token");
-          const res = await API.get("/bookings/owner/notifications", {
+          const res = await API.get("/api/bookings/owner/notifications", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setOwnerNotificationCount(res.data.count);
