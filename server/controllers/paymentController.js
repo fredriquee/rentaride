@@ -6,6 +6,7 @@ const User = require("../models/User");
 
 // Khalti Configuration
 const KHALTI_SECRET_KEY = process.env.KHALTI_SECRET_KEY;
+const KHALTI_PUBLIC_KEY = process.env.KHALTI_PUBLIC_KEY;
 const KHALTI_SANDBOX_URL = "https://dev.khalti.com/api/v2";
 const KHALTI_PRODUCTION_URL = "https://khalti.com/api/v2";
 const IS_SANDBOX = process.env.NODE_ENV !== "production";
@@ -39,12 +40,12 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
   const { bookingId } = req.body;
   const userId = req.user._id;
 
-  // Check if Khalti secret key is configured
-  if (!KHALTI_SECRET_KEY) {
-    console.error("❌ KHALTI_SECRET_KEY is not configured in environment variables");
+  // Check if Khalti credentials are configured
+  if (!KHALTI_SECRET_KEY || !KHALTI_PUBLIC_KEY) {
+    console.error("❌ Khalti credentials not configured. KHALTI_SECRET_KEY:", !!KHALTI_SECRET_KEY, "KHALTI_PUBLIC_KEY:", !!KHALTI_PUBLIC_KEY);
     return res.status(500).json({ 
       message: "Payment gateway not configured. Please contact support.",
-      error: "KHALTI_SECRET_KEY missing"
+      error: "Khalti credentials missing"
     });
   }
 
@@ -136,13 +137,22 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
   };
 
   try {
+    // Log the request details for debugging
+    console.log("📤 Khalti Initiate Payment Request:", {
+      url: `${KHALTI_API_URL}/epayment/initiate/`,
+      hasPublicKey: !!KHALTI_PUBLIC_KEY,
+      publicKeyLength: KHALTI_PUBLIC_KEY?.length || 0,
+      payloadAmount: khaltiPayload.amount,
+      purchaseOrderId: khaltiPayload.purchase_order_id
+    });
+
     // Call Khalti API to initiate payment
     const khaltiResponse = await axios.post(
       `${KHALTI_API_URL}/epayment/initiate/`,
       khaltiPayload,
       {
         headers: {
-          "Authorization": `Key ${KHALTI_SECRET_KEY}`,
+          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
           "Content-Type": "application/json"
         }
       }
@@ -189,13 +199,14 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
-      khaltiUrl: KHALTI_API_URL
+      khaltiUrl: KHALTI_API_URL,
+      authHeaderFormat: `Key ${KHALTI_PUBLIC_KEY ? KHALTI_PUBLIC_KEY.substring(0, 10) + "..." : "NOT_SET"}`
     });
     
     res.status(400).json({
       message: "Failed to initiate payment",
       error: error.response?.data?.detail || error.response?.data || error.message,
-      hint: "Make sure KHALTI_SECRET_KEY is set correctly in environment variables"
+      hint: "Ensure KHALTI_PUBLIC_KEY (not SECRET_KEY) is set correctly in environment variables"
     });
   }
 });
@@ -229,7 +240,7 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
       { pidx },
       {
         headers: {
-          "Authorization": `Key ${KHALTI_SECRET_KEY}`,
+          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
           "Content-Type": "application/json"
         }
       }
@@ -295,7 +306,7 @@ exports.handlePaymentCallback = asyncHandler(async (req, res) => {
       { pidx },
       {
         headers: {
-          "Authorization": `Key ${KHALTI_SECRET_KEY}`,
+          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
           "Content-Type": "application/json"
         }
       }
