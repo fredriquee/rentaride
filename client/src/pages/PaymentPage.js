@@ -28,8 +28,25 @@ function PaymentPage() {
     const checkPaymentStatus = async () => {
       try {
         // Get payment info via booking
-        const paymentData = await paymentService.getPaymentByBooking(bookingId);
-        setPayment(paymentData.payment);
+        let paymentData = null;
+
+        try {
+          paymentData = await paymentService.getPaymentByBooking(bookingId);
+
+          if (paymentData?.payment) {
+            setPayment(paymentData.payment);
+
+            if (paymentData.payment.gateway) {
+              setSelectedGateway(paymentData.payment.gateway);
+            }
+          } else {            
+            setPayment(null);
+          }
+
+        } catch (err) {
+          console.log("No payment yet");
+          setPayment(null);
+        }
         if (paymentData.payment?.gateway) {
           setSelectedGateway(paymentData.payment.gateway);
         }

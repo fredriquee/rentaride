@@ -12,6 +12,9 @@ const KHALTI_PRODUCTION_URL = "https://khalti.com/api/v2";
 const IS_SANDBOX = process.env.NODE_ENV !== "production";
 const KHALTI_API_URL = IS_SANDBOX ? KHALTI_SANDBOX_URL : KHALTI_PRODUCTION_URL;
 
+// Local Test Mode - allows testing without real Khalti credentials
+const USE_LOCAL_PAYMENT_MOCK = process.env.USE_LOCAL_PAYMENT_MOCK === "true" || (IS_SANDBOX && !KHALTI_PUBLIC_KEY);
+
 // eSewa Configuration
 const ESEWA_SECRET_KEY = process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q";
 const ESEWA_MERCHANT_ID = process.env.ESEWA_MERCHANT_ID || "EPAYTEST";
@@ -41,8 +44,9 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Check if Khalti credentials are configured
-  if (!KHALTI_SECRET_KEY || !KHALTI_PUBLIC_KEY) {
+  if (!USE_LOCAL_PAYMENT_MOCK && (!KHALTI_SECRET_KEY || !KHALTI_PUBLIC_KEY)) {
     console.error("❌ Khalti credentials not configured. KHALTI_SECRET_KEY:", !!KHALTI_SECRET_KEY, "KHALTI_PUBLIC_KEY:", !!KHALTI_PUBLIC_KEY);
+    console.log("💡 Tip: Set USE_LOCAL_PAYMENT_MOCK=true in .env to use local mock payments for testing");
     return res.status(500).json({ 
       message: "Payment gateway not configured. Please contact support.",
       error: "Khalti credentials missing"
@@ -143,20 +147,37 @@ exports.initiatePayment = asyncHandler(async (req, res) => {
       hasPublicKey: !!KHALTI_PUBLIC_KEY,
       publicKeyLength: KHALTI_PUBLIC_KEY?.length || 0,
       payloadAmount: khaltiPayload.amount,
-      purchaseOrderId: khaltiPayload.purchase_order_id
+      purchaseOrderId: khaltiPayload.purchase_order_id,
+      usingLocalMock: USE_LOCAL_PAYMENT_MOCK
     });
 
-    // Call Khalti API to initiate payment
-    const khaltiResponse = await axios.post(
-      `${KHALTI_API_URL}/epayment/initiate/`,
-      khaltiPayload,
-      {
-        headers: {
-          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
-          "Content-Type": "application/json"
+    let khaltiResponse;
+
+    // Use local mock payment for testing (when credentials missing or explicitly enabled)
+    if (USE_LOCAL_PAYMENT_MOCK) {
+      console.log("✅ Using LOCAL MOCK Payment Mode for testing");
+      
+      khaltiResponse = {
+        data: {
+          pidx: `LOCAL_${purchaseOrderId}_${Date.now()}`,
+          payment_url: `http://localhost:3000/payment-mock/${bookingId}`,
+          expires_at: new Date(Date.now() + 3600000).toISOString(),
+          expires_in: 3600
         }
-      }
-    );
+      };
+    } else {
+      // Call real Khalti API
+      khaltiResponse = await axios.post(
+        `${KHALTI_API_URL}/epayment/initiate/`,
+        khaltiPayload,
+        {
+          headers: {
+            "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
 
     const { pidx, payment_url, expires_at, expires_in } = khaltiResponse.data;
 
@@ -234,17 +255,33 @@ exports.verifyPayment = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Call Khalti lookup API to verify payment status
-    const khaltiResponse = await axios.post(
-      `${KHALTI_API_URL}/epayment/lookup/`,
-      { pidx },
-      {
-        headers: {
-          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
-          "Content-Type": "application/json"
+    let khaltiResponse;
+
+    // For local mock payments, auto-approve
+    if (pidx.startsWith("LOCAL_")) {
+      console.log("✅ Verifying LOCAL MOCK Payment:", pidx);
+      khaltiResponse = {
+        data: {
+          status: "Completed",
+          transaction_id: pidx,
+          total_amount: payment.amountInPaisa,
+          fee: 0,
+          refunded: false
         }
-      }
-    );
+      };
+    } else {
+      // Call real Khalti lookup API to verify payment status
+      khaltiResponse = await axios.post(
+        `${KHALTI_API_URL}/epayment/lookup/`,
+        { pidx },
+        {
+          headers: {
+            "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
 
     const { status, transaction_id, total_amount, fee, refunded } = khaltiResponse.data;
 
@@ -300,17 +337,30 @@ exports.handlePaymentCallback = asyncHandler(async (req, res) => {
   }
 
   try {
-    // Verify payment with Khalti
-    const khaltiResponse = await axios.post(
-      `${KHALTI_API_URL}/epayment/lookup/`,
-      { pidx },
-      {
-        headers: {
-          "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
-          "Content-Type": "application/json"
+    let khaltiResponse;
+
+    // For local mock payments, auto-approve
+    if (pidx.startsWith("LOCAL_")) {
+      console.log("✅ Processing LOCAL MOCK Payment callback:", pidx);
+      khaltiResponse = {
+        data: {
+          status: "Completed",
+          transaction_id: pidx
         }
-      }
-    );
+      };
+    } else {
+      // Verify payment with Khalti
+      khaltiResponse = await axios.post(
+        `${KHALTI_API_URL}/epayment/lookup/`,
+        { pidx },
+        {
+          headers: {
+            "Authorization": `Key ${KHALTI_PUBLIC_KEY}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
 
     const { status: khaltiStatus, transaction_id: khaltiTransactionId } = khaltiResponse.data;
 
@@ -362,8 +412,6 @@ exports.getPaymentByBooking = asyncHandler(async (req, res) => {
   const { bookingId } = req.params;
   const userId = req.user._id;
 
-  // Only fetch active payments (not cancelled or failed)
-  // Populate booking with vehicle to check ownership
   const payment = await Payment.findOne({ 
     booking: bookingId,
     status: { $in: ["initiated", "pending", "completed", "paid"] }
@@ -374,12 +422,14 @@ exports.getPaymentByBooking = asyncHandler(async (req, res) => {
       select: "owner"
     }
   });
-  
+
   if (!payment) {
-    return res.status(404).json({ message: "Payment not found" });
+    return res.status(200).json({
+      success: true,
+      payment: null
+    });
   }
 
-  // Verify ownership - allow if user is the renter OR the vehicle owner
   const isRenter = payment.user.toString() === userId.toString();
   const isOwner = payment.booking.vehicle.owner?.toString() === userId.toString();
 

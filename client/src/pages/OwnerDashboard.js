@@ -29,9 +29,9 @@ function OwnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Protect this page - only owners can access
+  // Protect this page - only owners and admins can access
   useEffect(() => {
-    if (!user || user.currentRole !== "owner") {
+    if (!user || (user.currentRole !== "owner" && user.role !== "admin")) {
       toast.error("You must be in Owner mode to access this page");
       navigate("/");
     }

@@ -22,6 +22,11 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
       const userId = decoded._id || decoded.id;
       req.user = await User.findById(userId).select("-password");
 
+      if (!req.user) {
+        res.status(401);
+        throw new Error("Not authorized, user not found");
+      }
+
       next();
     } catch (error) {
       res.status(401);
@@ -45,9 +50,16 @@ const adminMiddleware = (req, res, next) => {
 };
 
 const ownerMiddleware = (req, res, next) => {
-  if (req.user && req.user.currentRole === "owner") {
+  console.log("Checking owner access for user:", req.user ? {
+    id: req.user._id,
+    role: req.user.role,
+    currentRole: req.user.currentRole
+  } : "No user");
+
+  if (req.user && (req.user.currentRole === "owner" || req.user.role === "admin")) {
     next();
   } else {
+    console.log("Access denied in ownerMiddleware");
     res.status(403);
     throw new Error("You must be in Owner mode to perform this action. Switch to Owner mode in Settings.");
   }

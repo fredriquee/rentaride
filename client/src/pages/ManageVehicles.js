@@ -17,8 +17,6 @@ function ManageVehicles() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
     fetchVehicles();
   }, []);
@@ -26,13 +24,15 @@ function ManageVehicles() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const res = await API.get("/api/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setVehicles(res.data);
     } catch (error) {
-      toast.error("Failed to fetch your vehicles");
-      console.error(error);
+      const message = error.response?.data?.message || "Failed to fetch your vehicles";
+      toast.error(message);
+      console.error("Fetch vehicles error:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -102,6 +102,7 @@ function ManageVehicles() {
 
   const handleUpdate = async (vehicleId) => {
     try {
+      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("title", editForm.title);
       formData.append("type", editForm.type);
@@ -134,6 +135,7 @@ function ManageVehicles() {
     if (!window.confirm("Delete this image?")) return;
 
     try {
+      const token = localStorage.getItem("token");
       await API.delete(`/api/vehicles/${vehicleId}/image`, {
         data: { imageUrl },
         headers: { Authorization: `Bearer ${token}` },
@@ -148,6 +150,7 @@ function ManageVehicles() {
 
   const handleStatusChange = async (vehicleId, newStatus) => {
     try {
+      const token = localStorage.getItem("token");
       await API.put(
         `/api/vehicles/${vehicleId}`,
         { status: newStatus },
@@ -167,6 +170,7 @@ function ManageVehicles() {
     if (!window.confirm("Are you sure you want to delete this vehicle?")) return;
 
     try {
+      const token = localStorage.getItem("token");
       await API.delete(`/api/vehicles/${vehicleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

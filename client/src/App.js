@@ -12,6 +12,7 @@ import AddVehicle from "./pages/AddVehicle";
 import ManageVehicles from "./pages/ManageVehicles";
 import BookingPage from "./pages/BookingPage";
 import PaymentPage from "./pages/PaymentPage";
+import MockPaymentReturn from "./pages/MockPaymentReturn";
 import UserProfile from "./pages/UserProfile";
 import Settings from "./pages/Settings";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -33,7 +34,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (user && user.currentRole === "owner") {
+      if (user && (user.currentRole === "owner" || user.role === "admin")) {
         try {
           const token = localStorage.getItem("token");
           const res = await API.get("/api/bookings/owner/notifications", {
@@ -41,7 +42,7 @@ const Navbar = () => {
           });
           setOwnerNotificationCount(res.data.count);
         } catch (error) {
-          console.error("Failed to fetch owner notifications:", error);
+          console.error("Failed to fetch owner notifications:", error.response?.data || error.message);
         }
       }
     };
@@ -84,7 +85,7 @@ const Navbar = () => {
                   My Bookings
                 </Link>
               )}
-              {user?.currentRole === "owner" && (
+              {(user?.currentRole === "owner" || user?.role === "admin") && (
                 <Link to="/my-vehicles" className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1.5">
                   <Car size={18} />
                   My Vehicles
@@ -96,7 +97,7 @@ const Navbar = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               {user ? (
                 <>
-                  {user.currentRole === "owner" && (
+                  {(user.currentRole === "owner" || user.role === "admin") && (
                     <div className="flex items-center gap-2 sm:gap-4 mr-2">
                       <Link to="/owner-dashboard" className="relative p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all group" title="Manage Bookings">
                         <CalendarDays size={20} />
@@ -251,6 +252,7 @@ function App() {
                   <Route path="/add-vehicle" element={<ProtectedRoute component={AddVehicle} requiredRole="owner" />} />
                   <Route path="/book/:id" element={<ProtectedRoute component={BookingPage} />} />
                   <Route path="/payment/:bookingId" element={<ProtectedRoute component={PaymentPage} />} />
+                  <Route path="/payment-mock/:bookingId" element={<ProtectedRoute component={MockPaymentReturn} />} />
                   <Route path="/profile/:userId" element={<UserProfile />} />
                   <Route path="/profile" element={<ProtectedRoute component={UserProfile} />} />
                   <Route path="/settings" element={<ProtectedRoute component={Settings} />} />

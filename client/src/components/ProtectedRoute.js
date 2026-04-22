@@ -19,8 +19,8 @@ const ProtectedRoute = ({ component: Component, requiredRole = null }) => {
       return <Navigate to="/" replace />;
     }
   } else if (requiredRole) {
-    // For other roles, check currentRole
-    if (user.currentRole !== requiredRole) {
+    // For other roles, check currentRole or if user is admin
+    if (user.currentRole !== requiredRole && user.role !== "admin") {
       return <Navigate to="/" replace />;
     }
   }

@@ -137,20 +137,26 @@ exports.updateVehicle = asyncHandler(async (req, res) => {
   // Handle new image uploads (replace old one)
   if (req.files && req.files.length > 0) {
     // Delete old image from Cloudinary if it exists
-    if (vehicle.image && vehicle.image.includes("cloudinary")) {
+    if (vehicle.image && vehicle.image.includes && vehicle.image.includes("cloudinary")) {
       try {
         // Extract public_id from Cloudinary URL
-        const publicId = vehicle.image.split("/").pop().split(".")[0];
-        await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+        const urlParts = vehicle.image.split("/");
+        const filename = urlParts[urlParts.length - 1];
+        const publicId = filename.split(".")[0];
+        if (publicId) {
+          await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+        }
       } catch (error) {
         console.error("Error deleting old image from Cloudinary:", error);
       }
     }
 
     // Set new image from Cloudinary
-    const newImagePath = req.files[0].path;
-    vehicle.image = newImagePath;
-    vehicle.images = [newImagePath];
+    if (req.files[0] && req.files[0].path) {
+      const newImagePath = req.files[0].path;
+      vehicle.image = newImagePath;
+      vehicle.images = [newImagePath];
+    }
   }
 
   const updated = await vehicle.save();
@@ -185,11 +191,15 @@ exports.deleteVehicleImage = asyncHandler(async (req, res) => {
   }
 
   // Delete file from Cloudinary if it's a Cloudinary URL
-  if (imageUrl.includes("cloudinary")) {
+  if (imageUrl && imageUrl.includes && imageUrl.includes("cloudinary")) {
     try {
       // Extract public_id from Cloudinary URL
-      const publicId = imageUrl.split("/").pop().split(".")[0];
-      await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+      const urlParts = imageUrl.split("/");
+      const filename = urlParts[urlParts.length - 1];
+      const publicId = filename.split(".")[0];
+      if (publicId) {
+        await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+      }
     } catch (error) {
       console.error("Error deleting image from Cloudinary:", error);
     }
@@ -217,13 +227,17 @@ exports.deleteVehicle = asyncHandler(async (req, res) => {
   }
 
   // Delete uploaded images from Cloudinary
-  if (vehicle.images && vehicle.images.length > 0) {
+  if (vehicle.images && Array.isArray(vehicle.images) && vehicle.images.length > 0) {
     for (const imagePath of vehicle.images) {
-      if (imagePath.includes("cloudinary")) {
+      if (imagePath && typeof imagePath === "string" && imagePath.includes("cloudinary")) {
         try {
           // Extract public_id from Cloudinary URL
-          const publicId = imagePath.split("/").pop().split(".")[0];
-          await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+          const urlParts = imagePath.split("/");
+          const filename = urlParts[urlParts.length - 1];
+          const publicId = filename.split(".")[0];
+          if (publicId) {
+            await cloudinary.uploader.destroy(`rentaride/vehicles/${publicId}`);
+          }
         } catch (error) {
           console.error("Error deleting image from Cloudinary:", error);
         }
