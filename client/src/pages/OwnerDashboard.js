@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { DashboardSkeleton } from "../components/SkeletonLoader";
 
 function OwnerDashboard() {
   const navigate = useNavigate();
@@ -199,11 +200,7 @@ function OwnerDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   const pendingBookings = bookings.filter(b => b.status === 'pending' || b.status === 'cancellation_requested');

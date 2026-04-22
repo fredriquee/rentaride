@@ -4,6 +4,7 @@ import API from "../api";
 import { toast } from "react-hot-toast";
 import { CalendarDays, MapPin, Car, IndianRupee, Clock, Info, Phone, User, Mail } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { BookingPageSkeleton } from "../components/SkeletonLoader";
 
 function BookingPage() {
   const { id } = useParams();
@@ -96,7 +97,7 @@ function BookingPage() {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-20 animate-pulse">Loading vehicle...</div>;
+  if (loading) return <BookingPageSkeleton />;
   if (!vehicle) return null;
 
   return (

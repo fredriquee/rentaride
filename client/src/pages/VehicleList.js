@@ -5,6 +5,7 @@ import { MapPin, Tag, Car, Fuel, Phone, Mail, ChevronLeft, ChevronRight } from "
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import VehicleFilter from "../components/VehicleFilter";
+import { VehicleListSkeleton } from "../components/SkeletonLoader";
 
 function VehicleList() {
   const [vehicles, setVehicles] = useState([]);
@@ -111,8 +112,8 @@ function VehicleList() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="px-3 sm:px-4 md:px-0">
+        <VehicleListSkeleton count={6} />
       </div>
     );
   }

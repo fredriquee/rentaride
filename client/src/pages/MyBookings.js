@@ -3,6 +3,7 @@ import API from "../api";
 import { toast } from "react-hot-toast";
 import { CalendarDays, MapPin, Tag, Clock, CheckCircle2, XCircle, Car, Info, MessageSquareText, CreditCard, Phone, User, Mail, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { BookingCardSkeleton } from "../components/SkeletonLoader";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -150,8 +151,15 @@ function MyBookings() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">My Bookings</h2>
+        </div>
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <BookingCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }

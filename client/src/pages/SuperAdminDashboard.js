@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import API from "../api";
 import { toast } from "react-hot-toast";
 import { Users, Car, CalendarDays, Trash2, ShieldCheck, Search, X, ChevronDown, DollarSign, AlertCircle, Mail } from "lucide-react";
+import { DashboardSkeleton } from "../components/SkeletonLoader";
 
 function SuperAdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -171,11 +172,7 @@ function SuperAdminDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   return (

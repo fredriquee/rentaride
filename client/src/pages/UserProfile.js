@@ -22,7 +22,7 @@ const UserProfile = () => {
         setLoading(true);
         // Fetch user profile info
         const userResponse = await API.get(
-          `/vehicles/user/${displayUserId}`
+          `/api/vehicles/user/${displayUserId}`
         );
 
         // Get user name from the first vehicle's owner data, or set a default

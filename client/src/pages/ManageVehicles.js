@@ -5,6 +5,7 @@ import { Edit2, Trash2, Plus, X, Upload, Check, Image as ImageIcon, Phone, MapPi
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import StatusToggle from "../components/StatusToggle";
+import { ManageVehiclesSkeleton } from "../components/SkeletonLoader";
 
 function ManageVehicles() {
   const [vehicles, setVehicles] = useState([]);
@@ -23,6 +24,7 @@ function ManageVehicles() {
   }, []);
 
   const fetchVehicles = async () => {
+    setLoading(true);
     try {
       const res = await API.get("/api/vehicles/my", {
         headers: { Authorization: `Bearer ${token}` },
@@ -178,8 +180,12 @@ function ManageVehicles() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">My Vehicles</h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your vehicle listings</p>
+        </div>
+        <ManageVehiclesSkeleton count={3} />
       </div>
     );
   }

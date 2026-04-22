@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { CreditCard, CheckCircle, AlertCircle, Loader, Home, Download } from "lucide-react";
 import paymentService from "../services/paymentService";
 import { useAuth } from "../context/AuthContext";
+import { BookingPageSkeleton } from "../components/SkeletonLoader";
 
 function PaymentPage() {
   const { bookingId } = useParams();
@@ -232,15 +233,7 @@ function PaymentPage() {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="flex justify-center items-center min-h-96">
-          <div className="animate-spin">
-            <Loader size={48} className="text-blue-600" />
-          </div>
-        </div>
-      </div>
-    );
+    return <BookingPageSkeleton />;
   }
 
   return (

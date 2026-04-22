@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { DashboardSkeleton } from "../components/SkeletonLoader";
 
 function UserDashboard() {
   const { user } = useAuth();
@@ -111,11 +112,7 @@ function UserDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Get upcoming bookings
